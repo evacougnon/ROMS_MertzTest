@@ -581,6 +581,7 @@
 ** LAB_CANYON          Lab Canyon, Polar Coordinates Example                 **
 ** LAKE_SIGNELL        Lake Signell Sediment Test Case                       **
 ** LMD_TEST            Test for LMD and KPP                                  **
+** MERTZ_TEST          Idealised 3D ice-shelf/ocean for the Mertz region     **
 ** OVERFLOW            Gravitational/Overflow Example                        **
 ** RIVERPLUME1         River Plume Example 1                                 **
 ** RIVERPLUME2         River plume Example 2 (Hyatt and Signell)             **

@@ -405,6 +405,12 @@
       depth=980.0_r8
       f0=0.0_r8
       beta=0.0_r8
+#elif defined MERTZ_TEST
+      Xsize=350.0E+03_r8
+      Esize=390.0E+03_r8
+      depth=500.0_r8
+      f0=0.0_r8
+      beta=0.0_r8
 #else
       ana_grid.h: no values provided for Xsize, Esize, depth, f0, beta.
 #endif
@@ -532,6 +538,24 @@
           yv(i,j)=yp(i,j)
         END DO
       END DO
+#elif defined MERTZ_TEST
+!
+!  Spherical coordinates set-up.
+!
+      spherical=.TRUE.
+      DO j=JstrR,JendR
+        cff=-68.0_r8+0.1_r8*REAL(j-1,r8)
+        DO i=IstrR,IendR
+          lonr(i,j)=0.3_r8*REAL(i-1,r8)
+          latr(i,j)=cff
+          lonu(i,j)=0.3_r8*REAL(i-1,r8)+0.15_r8
+          lonp(i,j)=lonu(i,j)
+          latu(i,j)=latr(i,j)
+          lonv(i,j)=lonr(i,j)
+          latv(i,j)=cff+0.05_r8
+          latp(i,j)=latv(i,j)
+        END DO
+      END DO
 #else
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
@@ -631,6 +655,19 @@
         DO i=I_RANGE
           wrkX(i,j)=1.0_r8/dx
           wrkY(i,j)=1.0_r8/dy
+        END DO
+      END DO
+# elif defined MERTZ_TEST
+!
+!  Spherical coordinates set-up.
+!
+      Eradius=6371020.0_r8
+      val1=360.0_r8/(0.3_r8*(2.0_r8*pi*Eradius))
+      val2=360.0_r8/(0.1_r8*(2.0_r8*pi*Eradius))
+      DO j=J_RANGE
+        DO i=I_RANGE
+          wrkX(i,j)=val1/COS(latr(i,j)*deg2rad)
+          wrkY(i,j)=val2
         END DO
       END DO
 #else
@@ -736,6 +773,13 @@
      &           SIN(latr(i,j)*deg2rad)
         END DO
       END DO
+# elif defined MERTZ_TEST
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
+     &           SIN(latr(i,j)*deg2rad)
+        END DO
+      END DO
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT
@@ -780,6 +824,13 @@
         END DO
       END DO
 # elif defined ICETEST
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
+     &           SIN(latr(i,j)*deg2rad)
+        END DO
+      END DO
+# elif defined MERTZ_TEST
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           f(i,j)=(4.0_r8*pi/86164.1_r8)*                                &
@@ -1025,6 +1076,23 @@
        write(6,*) h(i,j)
         END DO
       END DO
+# elif defined MERTZ_TEST
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          h(i,j)=500.0_r8
+        END DO
+      END DO
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.le.22) THEN
+            h(i,j)=500_r8
+          ELSE IF (j.le.27) THEN
+            h(i,j)=500.0_r8+(2000.0_r8/5.0_r8)*REAL(j-22,r8)
+          ELSE
+            h(i,j)=2500.0_r8
+          END IF
+        END DO
+      END DO
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT
@@ -1142,6 +1210,18 @@
      &             -atan(REAL(j-59,r8)/10)*(h(i,60)-300_r8))           &
      &             + 20_r8    
 !         write(6,*) zice(i,j) 
+          END IF
+        END DO
+      END DiO
+#  elif defined MERTZ_TEST
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.le.16) THEN
+            zice(i,j)=-300.0_r8
+!          ELSE IF (j.le.41) THEN
+!            zice(i,j)=-700.0_r8+(500.0_r8/40.0_r8)*REAL(j-1,r8)
+          ELSE
+            zice(i,j)=0.0_r8
           END IF
         END DO
       END DO
