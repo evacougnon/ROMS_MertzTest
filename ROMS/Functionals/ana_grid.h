@@ -1212,7 +1212,7 @@
 !         write(6,*) zice(i,j) 
           END IF
         END DO
-      END DiO
+      END DO
 #  elif defined MERTZ_TEST
       DO j=JstrR,JendR
         DO i=IstrR,IendR
