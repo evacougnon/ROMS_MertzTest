@@ -730,7 +730,7 @@
           END DO
         END DO
       END DO
-# elif defined MERTZ_TEST || defined AMERY || define ICESHELF2D
+# elif defined MERTZ_TEST || defined AMERY || defined ICESHELF2D
       DO k=1,N(ng)
         DO j=JstrR,JendR
           DO i=IstrR,IendR

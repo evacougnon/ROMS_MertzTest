@@ -47,8 +47,8 @@ ifdef USE_NETCDF4
     NETCDF_INCDIR ?= $(shell $(NC_CONFIG) --prefix)/include
              LIBS := $(shell $(NC_CONFIG) --flibs)
 else
-    NETCDF_INCDIR ?= /opt/netcdf-3.6.3/f90
-    NETCDF_LIBDIR ?= /opt/netcdf-3.6.3/libsrc/.libs
+    NETCDF_INCDIR ?= /apps/netcdf/3.6.2-intel/include
+    NETCDF_LIBDIR ?= /apps/netcdf/3.6.2-intel/lib
              LIBS := -L$(NETCDF_LIBDIR) -lnetcdf
 endif
 

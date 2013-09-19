@@ -335,7 +335,7 @@
 # endif
         END DO
       END DO
-#elif defined MERTZ_TEST || defined AMERY || define ICESHELF2D
+#elif defined MERTZ_TEST || defined AMERY || defined ICESHELF2D
       DO j=JstrR,JendR
         DO i=Istr,IendR
           sustr(i,j)=0.0_r8

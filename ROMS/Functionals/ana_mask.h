@@ -189,10 +189,13 @@
 #elif defined MERTZ_TEST 
       DO j=Jstrm2,Jendp2  
         DO i=Istrm2,Iendp2
-          mask(i,j)=1.0_r8
           IF ((i.le.16).and.                                            &
      &        (i.ge.20).and.                                            &
-     &        (j.le.5)) mask(i,j)=0.0_r8
+     &        (j.le.5)) THEN
+               mask(i,j)=0.0_r8
+          ELSE
+           mask(i,j)=1.0_r8
+          END IF
         END DO
       END DO
 #else

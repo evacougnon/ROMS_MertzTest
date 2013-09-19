@@ -546,7 +546,7 @@
       DO j=JstrR,JendR
         cff=-68.0_r8+0.1_r8*REAL(j-1,r8)
         DO i=IstrR,IendR
-          lonr(i,j)=0.3_r8*REAL(i-1,r8)
+          lonr(i,j)=142_r8*REAL(i-1,r8)
           latr(i,j)=cff
           lonu(i,j)=0.3_r8*REAL(i-1,r8)+0.15_r8
           lonp(i,j)=lonu(i,j)
@@ -662,8 +662,8 @@
 !  Spherical coordinates set-up.
 !
       Eradius=6371020.0_r8
-      val1=360.0_r8/(0.3_r8*(2.0_r8*pi*Eradius))
-      val2=360.0_r8/(0.1_r8*(2.0_r8*pi*Eradius))
+      val1=360.0_r8/(142_r8*(2.0_r8*pi*Eradius))
+      val2=360.0_r8/(141.8_r8*(2.0_r8*pi*Eradius))
       DO j=J_RANGE
         DO i=I_RANGE
           wrkX(i,j)=val1/COS(latr(i,j)*deg2rad)
