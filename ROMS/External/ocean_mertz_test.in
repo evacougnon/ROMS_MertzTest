@@ -69,7 +69,7 @@
 
 ! C-preprocessing Flag.
 
-    MyAppCPP = MERTZTEST 
+    MyAppCPP = MERTZ_TEST 
 
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
@@ -107,8 +107,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 1                               ! I-direction partition
-      NtileJ == 1                               ! J-direction partition
+      NtileI == 2                               ! I-direction partition
+      NtileJ == 2                               ! J-direction partition
 
 ! Set lateral boundary conditions keyword. Notice that a value is expected
 ! for each boundary segment per nested grid for each state variable.
@@ -186,8 +186,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 86400
-          DT == 300d0
+      NTIMES == 7200 
+          DT == 1200.0e0
      NDTFAST == 30
 
 ! Model iteration loops parameters.
@@ -209,7 +209,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
        NRREC == 0
    LcycleRST == T
-        NRST == 864
+        NRST == 100 !864
         NSTA == 1
         NFLT == 1
        NINFO == 1
@@ -220,22 +220,22 @@ ad_VolCons(north) ==  F                            ! northern boundary
         NHIS == 100 !864
      NDEFHIS == 0
       NTSAVG == 1
-        NAVG == 864
+        NAVG == 100 !864
      NDEFAVG == 0
       NTSDIA == 1
-        NDIA == 864
+        NDIA == 100 !864
      NDEFDIA == 0
 
 ! Output tangent linear and adjoint models parameters.
 
    LcycleTLM == F
-        NTLM == 864
+        NTLM == 100 !864
      NDEFTLM == 0
    LcycleADJ == F
-        NADJ == 864
+        NADJ == 100 !864
      NDEFADJ == 0
-        NSFF == 864
-        NOBC == 864
+        NSFF == 100 !864
+        NOBC == 100 !864
 
 ! GST output and check pointing restart parameters.
 

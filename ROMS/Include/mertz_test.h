@@ -31,7 +31,7 @@
 #define SPLINES
 #define ICESHELF
 #define ICESHELF_MORPH
-#undef  AVERAGES
+#undef AVERAGES
 #undef ATM_PRESS
 #undef ANA_PAIR
 #define MASKING
