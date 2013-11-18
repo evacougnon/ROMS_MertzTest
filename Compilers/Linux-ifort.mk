@@ -1,11 +1,11 @@
-# svn $Id$
+# svn $Id: Linux-ifort.mk 1307 2008-01-10 00:22:36Z arango $
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-# Copyright (c) 2002-2013 The ROMS/TOMS Group                           :::
+# Copyright (c) 2002-2008 The ROMS/TOMS Group                           :::
 #   Licensed under a MIT/X style license                                :::
 #   See License_ROMS.txt                                                :::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #
-# Include file for Intel IFORT (version 10.1) compiler on Linux
+# Include file for Intel IFORT (version 8.x) compiler on Linux
 # -------------------------------------------------------------------------
 #
 # ARPACK_LIBDIR  ARPACK libary directory
@@ -24,10 +24,11 @@
 # First the defaults
 #
                FC := ifort
-           FFLAGS := -heap-arrays -fp-model precise
+           FFLAGS :=
               CPP := /usr/bin/cpp
          CPPFLAGS := -P -traditional
-          LDFLAGS :=
+               LD := $(FC)
+          LDFLAGS := -Vaxlib
                AR := ar
           ARFLAGS := r
             MKDIR := mkdir -p
@@ -43,13 +44,16 @@
 #
 
 ifdef USE_NETCDF4
-        NC_CONFIG ?= nc-config
-    NETCDF_INCDIR ?= $(shell $(NC_CONFIG) --prefix)/include
-             LIBS := $(shell $(NC_CONFIG) --flibs)
+    NETCDF_INCDIR ?= /apps/netcdf/4.0.1-intel/include
+    NETCDF_LIBDIR ?= /apps/netcdf/4.0.1-intel/lib
+      HDF5_LIBDIR ?= /apps/hdf/1.8.4/lib
 else
     NETCDF_INCDIR ?= /apps/netcdf/3.6.2-intel/include
     NETCDF_LIBDIR ?= /apps/netcdf/3.6.2-intel/lib
+endif
              LIBS := -L$(NETCDF_LIBDIR) -lnetcdf
+ifdef USE_NETCDF4
+             LIBS += -L$(HDF5_LIBDIR) -lhdf5_hl -lhdf5 -lz
 endif
 
 ifdef USE_ARPACK
@@ -64,9 +68,11 @@ endif
 ifdef USE_MPI
          CPPFLAGS += -DMPI
  ifdef USE_MPIF90
-               FC := mpif90
+               FC := /opt/intelsoft/mpich/bin/mpif90
+#              FC := /opt/intelsoft/mpich2/bin/mpif90
+               LD := $(FC)
  else
-             LIBS += -lfmpi-pgi -lmpi-pgi
+             LIBS += -lmpi 
  endif
 endif
 
@@ -76,11 +82,15 @@ ifdef USE_OpenMP
 endif
 
 ifdef USE_DEBUG
-#          FFLAGS += -g -check bounds -traceback
-#          FFLAGS += -g -check bounds -traceback -check uninit -warn interfaces,nouncalled -gen-interfaces
-           FFLAGS += -g -check uninit -ftrapuv -traceback
+           FFLAGS += -g -check bounds -traceback
 else
            FFLAGS += -ip -O3
+ ifeq ($(CPU),i686)
+           FFLAGS += -pc80 -xW
+ endif
+ ifeq ($(CPU),x86_64)
+           FFLAGS += -xW
+ endif
 endif
 
 ifdef USE_MCT
@@ -91,7 +101,7 @@ ifdef USE_MCT
 endif
 
 ifdef USE_ESMF
-      ESMF_SUBDIR := $(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+      ESMF_SUBDIR := $(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_SITE)
       ESMF_MK_DIR ?= $(ESMF_DIR)/lib/lib$(ESMF_BOPT)/$(ESMF_SUBDIR)
                      include $(ESMF_MK_DIR)/esmf.mk
            FFLAGS += $(ESMF_F90COMPILEPATHS)
@@ -101,12 +111,6 @@ endif
        clean_list += ifc* work.pc*
 
 #
-# Use full path of compiler.
-#
-               FC := $(shell which ${FC})
-               LD := $(FC)
-
-#
 # Set free form format in source files to allow long string for
 # local directory and compilation flags inside the code.
 #
@@ -114,16 +118,6 @@ endif
 $(SCRATCH_DIR)/mod_ncparam.o: FFLAGS += -free
 $(SCRATCH_DIR)/mod_strings.o: FFLAGS += -free
 $(SCRATCH_DIR)/analytical.o: FFLAGS += -free
-$(SCRATCH_DIR)/biology.o: FFLAGS += -free
-ifdef USE_ADJOINT
-$(SCRATCH_DIR)/ad_biology.o: FFLAGS += -free
-endif
-ifdef USE_REPRESENTER
-$(SCRATCH_DIR)/rp_biology.o: FFLAGS += -free
-endif
-ifdef USE_TANGENT
-$(SCRATCH_DIR)/tl_biology.o: FFLAGS += -free
-endif
 
 #
 # Supress free format in SWAN source files since there are comments
@@ -149,9 +143,6 @@ $(SCRATCH_DIR)/swanpre2.o: FFLAGS += -nofree
 $(SCRATCH_DIR)/swanser.o: FFLAGS += -nofree
 $(SCRATCH_DIR)/swmod1.o: FFLAGS += -nofree
 $(SCRATCH_DIR)/swmod2.o: FFLAGS += -nofree
-$(SCRATCH_DIR)/m_constants.o: FFLAGS += -free
-$(SCRATCH_DIR)/m_fileio.o: FFLAGS += -free
-$(SCRATCH_DIR)/mod_xnl4v5.o: FFLAGS += -free
-$(SCRATCH_DIR)/serv_xnl4v5.o: FFLAGS += -free
+$(SCRATCH_DIR)/swmod3.o: FFLAGS += -nofree
 
 endif

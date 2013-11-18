@@ -88,7 +88,7 @@ MY_CPP_FLAGS ?=
 
 #  Activate debugging compiler options:
 
-   USE_DEBUG ?= 
+   USE_DEBUG ?=  
 
 #  If parallel applications, use at most one of these definitions
 #  (leave both definitions blank in serial applications):
@@ -104,7 +104,7 @@ MY_CPP_FLAGS ?=
 #  In this, case the user need to select the desired compiler below and
 #  turn on both USE_MPI and USE_MPIF90 macros.
 
-  USE_MPIF90 ?=
+  USE_MPIF90 ?=   
 
 #  If applicable, activate 64-bit compilation:
 
@@ -113,7 +113,7 @@ MY_CPP_FLAGS ?=
 #  If applicable, link with NetCDF-4 library. Notice that the NetCDF-4
 #  library needs both the HDF5 and MPI libraries.
 
- USE_NETCDF4 ?=
+ USE_NETCDF4 ?=  
 
 #--------------------------------------------------------------------------
 #  We are going to include a file with all the settings that depend on
@@ -138,7 +138,7 @@ MY_CPP_FLAGS ?=
 #  NetCDF and so on.
 #--------------------------------------------------------------------------
 
-        FORT ?= ifort
+        FORT ?= ifort 
 
 #--------------------------------------------------------------------------
 #  Set directory for executable.
