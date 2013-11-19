@@ -1,10 +1,9 @@
-Ben's version -- romsiceshelf
+ROMS iceshelfBen's version -- romsiceshelf
 
-with 2 typo corrections:
+with typo corrections:
 
-* in ROMS/Functionals/ 2 files (ana_initial.h and ana_smflux.h): defined ICESHELFD corrected
-
-* in ROMS/Nonlinear/IceShelf/iceshelf_vbc.F: 
+** 15/10/2013 -- modified by evacougnon:
+in ROMS/Nonlinear/IceShelf/iceshelf_vbc.F (from l.197 to 204): 
 
 # ifdef DISTRIBUTE
 #  ifdef EW_PERIODIC
@@ -18,4 +17,7 @@ with 2 typo corrections:
       logical :: NS_PERIODIC=.FALSE.
 #  endif
 # endif
+
+** 18/09/2013 -- modified by evacougnon: 
+in ROMS/Functionals/ 2 files (ana_initial.h -- l.733 and ana_smflux.h -- l.338): "define ICESHELF2D" replaced by "defined ICESHELFD"
 
