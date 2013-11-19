@@ -2,6 +2,9 @@ ROMS iceshelfBen's version -- romsiceshelf
 
 with typo corrections:
 
+** 20/11/2013 -- modified from Dave's edits
+in ROMS/External/ocean_icetest.in: Fixed ocean_icetest.in to have the correct CPP flag
+
 ** 15/10/2013 -- modified by evacougnon:
 in ROMS/Nonlinear/IceShelf/iceshelf_vbc.F (from l.197 to 204): 
 
