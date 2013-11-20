@@ -4,6 +4,7 @@ with typo corrections:
 
 ** 20/11/2013 -- modified from Dave's edits
 in ROMS/External/ocean_icetest.in: Fixed ocean_icetest.in to have the correct CPP flag
+in ROMS/Nonlinear/step2d_LF_AM3.h: Corrected CPP code in step2d routine
 
 ** 15/10/2013 -- modified by evacougnon:
 in ROMS/Nonlinear/IceShelf/iceshelf_vbc.F (from l.197 to 204): 
