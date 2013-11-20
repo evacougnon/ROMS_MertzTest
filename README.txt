@@ -1,4 +1,4 @@
-Ben's romsiceshelf version with modifictaion for Mertz domain
+romsiceshelf version from master branch adapted  for Mertz domain
 
 Application now call MERTZ_TEST
 Include ANA_MASK with a band of land south or the domain allowing a fjord in the middle of the south border
