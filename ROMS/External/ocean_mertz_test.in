@@ -146,28 +146,28 @@ GridsInLayer =  1
 !
 !                   1       2       3       4
 
-   LBC(isFsur) ==   Per     Clo     Per     Clo         ! free-surface
-   LBC(isUbar) ==   Per     Clo     Per     Clo         ! 2D U-momentum
-   LBC(isVbar) ==   Per     Clo     Per     Clo         ! 2D V-momentum
-   LBC(isUvel) ==   Per     Clo     Per     Clo         ! 3D U-momentum
-   LBC(isVvel) ==   Per     Clo     Per     Clo         ! 3D V-momentum
-   LBC(isMtke) ==   Per     Clo     Per     Clo         ! mixing TKE
+   LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
+   LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
+   LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D V-momentum
+   LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
+   LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
+   LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
 
-   LBC(isTvar) ==   Per     Clo     Per     Clo \       ! temperature
-                    Per     Clo     Per     Clo         ! salinity
+   LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
+                    Clo     Clo     Clo     Clo         ! salinity
 
 ! Adjoint-based algorithms can have different lateral boundary
 ! conditions keywords.
 
-ad_LBC(isFsur) ==   Per     Clo     Per     Clo         ! free-surface
-ad_LBC(isUbar) ==   Per     Clo     Per     Clo         ! 2D U-momentum
-ad_LBC(isVbar) ==   Per     Clo     Per     Clo         ! 2D U-momentum
-ad_LBC(isUvel) ==   Per     Clo     Per     Clo         ! 3D U-momentum
-ad_LBC(isVvel) ==   Per     Clo     Per     Clo         ! 3D V-momentum
-ad_LBC(isMtke) ==   Per     Clo     Per     Clo         ! mixing TKE
+ad_LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
+ad_LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
+ad_LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
+ad_LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
+ad_LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
+ad_LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
 
-ad_LBC(isTvar) ==   Per     Clo     Per     Clo \       ! temperature
-                    Per     Clo     Per     Clo         ! salinity
+ad_LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
+                    Clo     Clo     Clo     Clo         ! salinity
 
 ! Set lateral open boundary edge volume conservation switch for
 ! nonlinear model and adjoint-based algorithms. Usually activated
@@ -186,8 +186,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 9467280 ! for 30 years !for 100 days and dt100 ntimes 86400
-          DT == 100d0
+      NTIMES == 9600 !9467280 ! for 30 years !for 100 days and dt100 ntimes 86400
+          DT == 900d0
      NDTFAST == 30
 
 ! Model iteration loops parameters.
@@ -209,7 +209,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
        NRREC == 0
    LcycleRST == T
-        NRST == 157788
+        NRST == 100
         NSTA == 1
         NFLT == 1
        NINFO == 1
@@ -217,25 +217,25 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Output history, average, diagnostic files parameters.
 
      LDEFOUT == T
-        NHIS == 26298 !864
-     NDEFHIS == 315576 !8640
+        NHIS == 960 !26298 !864
+     NDEFHIS == 0  !315576 !8640
       NTSAVG == 1
-        NAVG == 26298 !864
+        NAVG == 960 !26298 !864
      NDEFAVG == 0
       NTSDIA == 1
-        NDIA == 26298 !864
+        NDIA == 960 !26298 !864
      NDEFDIA == 0
 
 ! Output tangent linear and adjoint models parameters.
 
    LcycleTLM == F
-        NTLM == 26298 !864
+        NTLM == 960 !26298 !864
      NDEFTLM == 0
    LcycleADJ == F
-        NADJ == 26298 !864
+        NADJ == 960 !26298 !864
      NDEFADJ == 0
-        NSFF == 262989 !864
-        NOBC == 26298 !864
+        NSFF == 960 !262989 !864
+        NOBC == 960 !26298 !864
 
 ! GST output and check pointing restart parameters.
 
@@ -251,7 +251,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Harmonic/biharmonic horizontal diffusion of tracer for nonlinear model
 ! and adjoint-based algorithms: [1:NAT+NPT,Ngrids].
 
-        TNU2 == 100.0d0 100.0d0                 ! m2/s
+        TNU2 == 5.0d0 5.0d0                 ! m2/s
         TNU4 ==  0.0d0  0.0d0                   ! m4/s
 
      ad_TNU2 == 0.0d0  0.0d0                    ! m2/s

@@ -16,6 +16,7 @@
 #define UV_COR
 #define UV_VIS2
 #define UV_QDRAG
+#undef UV_LOGDRAG
 #define MIX_GEO_UV
 #undef MIX_S_UV
 #define TS_C4HADVECTION

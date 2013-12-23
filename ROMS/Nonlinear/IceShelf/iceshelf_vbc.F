@@ -56,9 +56,9 @@
       USE mod_iceshelf
       USE mod_coupling
       USE mod_stepping
-#ifdef ICESHELF_MORPH
+!#ifdef ICESHELF_MORPH
       USE mod_iceshelfvar
-#endif
+!#endif
 !
       implicit none
 !
@@ -126,9 +126,9 @@
       USE mod_scalars
 !
       USE mod_iceshelf
-#ifdef ICESHELF_MORPH
+!#ifdef ICESHELF_MORPH
       USE mod_iceshelfvar
-#endif
+!#endif
       USE bc_2d_mod
       USE exchange_2d_mod, ONLY : exchange_r2d_tile
 # ifdef DISTRIBUTE
@@ -193,15 +193,15 @@
 !  Local variable declarations.
 !
 # ifdef DISTRIBUTE
-#  ifdef EW_PERIODIC
-      logical :: EW_PERIODIC=.TRUE.
+#  ifdef EWperiodic
+      logical :: EWperiodic=.TRUE.
 #  else
-      logical :: EW_PERIODIC=.FALSE.
+      logical :: EWperiodic=.FALSE.
 #  endif
-#  ifdef NS_PERIODIC
-      logical :: NS_PERIODIC=.TRUE.
+#  ifdef NSperiodic
+      logical :: NSperiodic=.TRUE.
 #  else
-      logical :: NS_PERIODIC=.FALSE.
+      logical :: NSperiodic=.FALSE.
 #  endif
 # endif
 !      integer :: IstrR, IENDR, JstrR, JendR, IstrU, JstrV
@@ -246,48 +246,155 @@
         sfcSalt = saltMin
       endif
 #    endif
-
-#    ifdef ICESHELF_3EQN_VBC
-      Pradj = 12.5_r8*(Pr**(2/3))
-      Scadj = 12.5_r8*(Sc**(2/3))
-      Cdrt =  sqrt(Cd)
-      cp_i =  152.5_r8+7.122_r8*(273.15_r8+Ti)
-      rhoi_on_rho0 = rho_i/rho0
-#   endif
-
+!
+!-----------------------------------------------------------------------
+!  If ice shelf cavities, replace surface wind stress with ice shelf
+!  cavity stress (m2/s2).
+!-----------------------------------------------------------------------
+ 
+#   if defined UV_LOGDRAG
+!
+!  Set logarithmic ice shelf cavity stress.
+!
+      DO j=JstrV-1,JEND
+        DO i=IstrU-1,IEND
+          cff1=1.0_r8/LOG((z_w(i,j,N(ng))-z_r(i,j,N(ng)))/Zob(ng))
+          cff2=vonKar*vonKar*cff1*cff1
+          wrk(i,j)=MIN(Cdb_max,MAX(Cdb_min,cff2))
+        END DO
+      END DO
       DO j=Jstr,JEND
+        DO i=IstrU,IEND
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
+     &                    v(i  ,j+1,N(ng),nrhs)+                        &
+     &                    v(i-1,j  ,N(ng),nrhs)+                        &
+     &                    v(i-1,j+1,N(ng),nrhs))
+            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
+            sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                   &
+     &                 u(i,j,N(ng),nrhs)*cff2
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,JEND
         DO i=Istr,IEND
-# ifdef SALINITY
-          Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
-          write(6,*)
-# else
-          Sm=0.0_r8
-# endif
-          IF (zice(i,j).ne.0.0_r8) THEN
-#if defined ICESHELF_2EQN_VBC
-          TFb = a*Sm+b+c*zice(i,j)
-# ifdef ICESHELF_TEOS10
-          ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
-          Tm = t_from_ct(Sm,ct,-zice(i,j))
-# else
-         CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
-# endif
-!            write(6,*) gamma,TFb,Tm
-            stflx(i,j,itemp)=gamma*(TFb-Tm)
-            stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
+     &                    u(i+1,j  ,N(ng),nrhs)+                        &
+     &                    u(i  ,j-1,N(ng),nrhs)+                        &
+     &                    u(i+1,j-1,N(ng),nrhs))
+            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
+            svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                   &
+     &                 v(i,j,N(ng),nrhs)*cff2
+          END IF
+        END DO
+      END DO
+     write(6,*) sustr(i,j),svstr(i,j)
+#   elif defined UV_QDRAG
+!
+!  Set quadratic ice shelf cavity stress.
+!
+      DO j=Jstr,JEND
+        DO i=IstrU,IEND
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
+     &                    v(i  ,j+1,N(ng),nrhs)+                        &
+     &                    v(i-1,j  ,N(ng),nrhs)+                        &
+     &                    v(i-1,j+1,N(ng),nrhs))
+            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
+            sustr(i,j)=-rdrg2(ng)*u(i,j,N(ng),nrhs)*cff2
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,JEND
+        DO i=Istr,IEND
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
+     &                    u(i+1,j  ,N(ng),nrhs)+                        &
+     &                    u(i  ,j-1,N(ng),nrhs)+                        &
+     &                    u(i+1,j-1,N(ng),nrhs))
+            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
+            svstr(i,j)=-rdrg2(ng)*v(i,j,N(ng),nrhs)*cff2
+          END IF
+        END DO
+      END DO
+     write(6,*) sustr(i,j),svstr(i,j)
+#    elif defined UV_LDRAG
+!
+!  Set linear ice shelf cavity stress.
+!
+      DO j=Jstr,JEND
+        DO i=IstrU,IEND
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            sustr(i,j)=-rdrg(ng)*u(i,j,N(ng),nrhs)
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,JEND
+        DO i=Istr,IEND
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            svstr(i,j)=-rdrg(ng)*v(i,j,N(ng),nrhs)
+          END IF
+        END DO
+      END DO
+     write(6,*) sustr(i,j),svstr(i,j)
+#    else
+      DO j=Jstr,JEND
+        DO i=IstrU,IEND
+          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
+            sustr(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+      DO j=JstrV,JEND
+        DO i=Istr,IEND
+          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
+            svstr(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
+#    endif
+ 
+#    ifdef ICESHELF_3EQN_VBC
+     Pradj = 12.5_r8*(Pr**(2/3))
+     Scadj = 12.5_r8*(Sc**(2/3))
+     Cdrt =  sqrt(Cd)
+     cp_i =  152.5_r8+7.122_r8*(273.15_r8+Ti)
+     rhoi_on_rho0 = rho_i/rho0
+#    endif
 
+     DO j=Jstr,JEND
+       DO i=Istr,IEND
+# ifdef SALINITY
+         Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
+!         write(6,*)
+# else
+         Sm=0.0_r8
+# endif
+         IF (zice(i,j).ne.0.0_r8) THEN
+#if defined ICESHELF_2EQN_VBC
+         TFb = a*Sm+b+c*zice(i,j)
+# ifdef ICESHELF_TEOS10
+         ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
+         Tm = t_from_ct(Sm,ct,-zice(i,j))
+# else
+        CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
+# endif
+!           write(6,*) gamma,TFb,Tm
+           stflx(i,j,itemp)=gamma*(TFb-Tm)
+           stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
 #  ifdef ICESHELF_MORPH
-            m(i,j) = stflx(i,j,isalt)/Sm
-            write(6,*) m(i,j),Sm
+           m(i,j) = stflx(i,j,isalt)/Sm
+           write(6,*) m(i,j),Sm
 #  endif
 
 #elif defined ICESHELF_3EQN_VBC
 ! Get the insitu salinity and temperature
 # ifdef ICESHELF_TEOS10
-          ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
-          Tm = t_from_ct(Sm,ct,-zice(i,j))
+         ct = ct_from_theta(Sm,t(i,j,N(ng),nrhs,itemp))
+         Tm = t_from_ct(Sm,ct,-zice(i,j))
 # else
-         CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
+        CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
 # endif
 
 !    Calculate exchange coefficients. Note that this assumes log profile 
@@ -297,24 +404,24 @@
 !            ustar = ustar*rmask(i,j)
 !#    endif
 
-           if(ustar.lt.small) ustar = small
+          if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
-            turb = 2.12*LOG((ustar*Hz(i,j,N(ng)))/visc)
-            gammaT(i,j) = ustar/(turb + Pradj - 9.0_r8)
-            gammaS(i,j) = ustar/(turb + Scadj - 9.0_r8)
+           turb = 2.12*LOG((ustar*Hz(i,j,N(ng)))/visc)
+           gammaT(i,j) = ustar/(turb + Pradj - 9.0_r8)
+           gammaS(i,j) = ustar/(turb + Scadj - 9.0_r8)
 #    elif defined GAMMAS_Mc1987
 ! Uses simplified version of McPhee 1987
-            IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
-              turb = 2.5*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12  
-            ELSE
-              turb = 0.0_r8
-            END IF
+           IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
+             turb = 2.5*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12  
+           ELSE
+             turb = 0.0_r8
+           END IF
 
-            gammaT(i,j) = ustar/(turb + Pradj - 6.0_r8)
-            gammaS(i,j) = ustar/(turb + Scadj - 6.0_r8)
+           gammaT(i,j) = ustar/(turb + Pradj - 6.0_r8)
+           gammaS(i,j) = ustar/(turb + Scadj - 6.0_r8)
 #    else
-            gammaT(i,j) = 1.00e-4_r8
-            gammaS(i,j) = 5.05e-7_r8
+           gammaT(i,j) = 1.00e-4_r8
+           gammaS(i,j) = 5.05e-7_r8
 #    endif
 
 # ifdef ICESHELF_VBC_HFPROPTOM
@@ -453,111 +560,6 @@
         DO i=IstrR,IENDR
           IF (zice(i,j).ne.0.0_r8) THEN
             srflx(i,j)=0.0_r8
-          END IF
-        END DO
-      END DO
-#   endif
-!
-!-----------------------------------------------------------------------
-!  If ice shelf cavities, replace surface wind stress with ice shelf
-!  cavity stress (m2/s2).
-!-----------------------------------------------------------------------
-
-#   if defined UV_LOGDRAG
-!
-!  Set logarithmic ice shelf cavity stress.
-!
-      DO j=JstrV-1,JEND
-        DO i=IstrU-1,IEND
-          cff1=1.0_r8/LOG((z_w(i,j,N(ng))-z_r(i,j,N(ng)))/Zob(ng))
-          cff2=vonKar*vonKar*cff1*cff1
-          wrk(i,j)=MIN(Cdb_max,MAX(Cdb_min,cff2))
-        END DO
-      END DO
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
-            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
-            sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                   &
-     &                 u(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
-            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
-            svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                   &
-     &                 v(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-#   elIF defined UV_QDRAG
-!
-!  Set quadratic ice shelf cavity stress.
-!
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
-            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
-            sustr(i,j)=-rdrg2(ng)*u(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
-            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
-            svstr(i,j)=-rdrg2(ng)*v(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-#   elif defined UV_LDRAG
-!
-!  Set linear ice shelf cavity stress.
-!
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            sustr(i,j)=-rdrg(ng)*u(i,j,N(ng),nrhs)
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            svstr(i,j)=-rdrg(ng)*v(i,j,N(ng),nrhs)
-          END IF
-        END DO
-      END DO
-#   else
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            sustr(i,j)=0.0_r8
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            svstr(i,j)=0.0_r8
           END IF
         END DO
       END DO

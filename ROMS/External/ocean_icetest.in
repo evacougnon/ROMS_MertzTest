@@ -186,7 +186,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 86400
+      NTIMES == 172800  !!!86400
           DT == 300d0
      NDTFAST == 30
 
@@ -251,7 +251,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Harmonic/biharmonic horizontal diffusion of tracer for nonlinear model
 ! and adjoint-based algorithms: [1:NAT+NPT,Ngrids].
 
-        TNU2 == 100.0d0 100.0d0                 ! m2/s
+        TNU2 == 5.0d0 5.0d0                 ! m2/s
         TNU4 ==  0.0d0  0.0d0                   ! m4/s
 
      ad_TNU2 == 0.0d0  0.0d0                    ! m2/s
