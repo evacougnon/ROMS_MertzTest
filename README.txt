@@ -9,8 +9,14 @@ Bad code in ROMS/Nonlinear/IceShelf/iceshelf_vbc.F that executes with ICETEST (l
 
 20/12/2013 -- GAMMAS calculation and ustar
 in Nonlinear/Iceshelf/iceshelf_mod.F
-Change: small=8.08e-6_r8 instead of 1.0e-10_r8.
+Changed: small=8.08e-6_r8 instead of 1.0e-10_r8.
 Because in Nonlinear/Iceshelf/iceshelf_vbc.F -- GAMMA_Mc1987, ustar.gt.small but GammaT needs to be less or equal to the molecular thermal diffusivity of sea water (Kt = 1.4e-7) which gives ustar~8.08e-6
+
+03/01/2014 -- ANA_SEAICE
+1- in Nonlinear/Iceshelf/iceshelf_mod.F
+Changed the position of the definition of gamma, refsalt and temp_f for IF DEFINED ICESHELF_3EQN_VBC out from IF DEFINED ANA_SEAICE
+2- Nonlinear/IceShelf/iceshelf_vbc.F
+Moved #endif at l.530 to l.512 (befose ELSE which indicate the zice=0 case and then allows to consider ANA_SEAICE to define seasonal flux for the open ocean)
 
 ** Adapted for an idealised Mertz Glacier region
 Application now call MERTZ_TEST

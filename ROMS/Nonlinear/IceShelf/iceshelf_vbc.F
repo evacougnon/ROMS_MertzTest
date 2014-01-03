@@ -509,7 +509,7 @@
 !            IF (zice(i,j).ne.0.0_r8) THEN
               stflx(i,j,itrc)=0.0_r8
       END DO
-
+#endif
           ELSE
             m(i,j) = 0.0_r8
 # if defined ANA_SEAICE
@@ -527,7 +527,7 @@
 !        END DO
 !      END DO
 
-#endif
+!#endif
 
           END IF
         END DO

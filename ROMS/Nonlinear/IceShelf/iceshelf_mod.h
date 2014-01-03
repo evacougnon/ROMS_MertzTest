@@ -38,13 +38,16 @@
       real(r8), parameter :: rho_i = 920.0_r8
       real(r8), parameter :: Ti = -20.0_r8
       real(r8), parameter :: Si = 0.0_r8
-#  endif
-#  ifdef ANA_SEAICE
-#   ifdef ICESHELF_3EQN_VBC
       real(r8), parameter :: gamma = 0.0001_r8
       real(r8), parameter :: refSalt = 34.4_r8
       real(r8) :: temp_f
-#   endif
+#  endif
+#  ifdef ANA_SEAICE
+!#   ifdef ICESHELF_3EQN_VBC
+!      real(r8), parameter :: gamma = 0.0001_r8
+!      real(r8), parameter :: refSalt = 34.4_r8
+!      real(r8) :: temp_f
+!#   endif
       real(r8), parameter :: trelax = 7.0_r8 * 86400.0_r8 ! 7 days
       real(r8), parameter :: saltMax = 35.0_r8
       real(r8), parameter :: saltMin = 34.0_r8
