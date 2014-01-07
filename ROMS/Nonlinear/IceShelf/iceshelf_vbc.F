@@ -73,6 +73,7 @@
      &                   LBi, UBi, LBj, UBj,                            &
      &                   IminS, ImaxS, JminS, JmaxS,                    &
      &                   nrhs(ng), nnew(ng),                            &
+     &                   GRID(ng) % Hz,                                 &
      &                   GRID(ng) % z_r,                                &
      &                   GRID(ng) % z_w,                                &
      &                   GRID(ng) % zice,                               &
@@ -106,7 +107,7 @@
       SUBROUTINE iceshelf_vbc_tile (ng, tile,                           &
      &                         LBi, UBi, LBj, UBj,                      &
      &                         IminS, ImaxS, JminS, JmaxS,              &
-     &                         nrhs,nnew,                               &
+     &                         nrhs,nnew,Hz,                            &
      &                         z_r, z_w,                                &
      &                         zice,f,                                  &
 # ifdef ICESHELF_MORPH
@@ -141,6 +142,7 @@
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: nrhs,nnew
+      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
 
 # ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: u(LBi:,LBj:,:,:)

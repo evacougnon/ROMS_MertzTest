@@ -18,6 +18,11 @@ Changed the position of the definition of gamma, refsalt and temp_f for IF DEFIN
 2- Nonlinear/IceShelf/iceshelf_vbc.F
 Moved #endif at l.530 to l.512 (befose ELSE which indicate the zice=0 case and then allows to consider ANA_SEAICE to define seasonal flux for the open ocean)
 
+07/01/2014 -- Hz does not have a type
+In Nonlinear/Iceshelf/iceshelf_vbc.F, added Hz in the variables (l.76, 110, and 145)
+
+
+
 ** Adapted for an idealised Mertz Glacier region
 Application now call MERTZ_TEST
 Include ANA_MASK with a band of land south or the domain allowing a fjord in the middle of the south border
