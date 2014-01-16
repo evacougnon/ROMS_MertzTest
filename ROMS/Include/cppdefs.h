@@ -576,6 +576,7 @@
 ** GRAV_ADJ            Gravitational Adjustment Example                      **
 ** INLET_TEST          Test Inlet Application                                **
 ** ICETEST             Idealised 3D ice-shelf/ocean application              **
+** ICETEST2D           Idealised 2D ice-shelf/ocean application - flat IS    **
 ** ICESHELF2D          Idealised 2D ice-shelf/ocean application              **
 ** KELVIN              Kelvin wave test                                      **
 ** LAB_CANYON          Lab Canyon, Polar Coordinates Example                 **

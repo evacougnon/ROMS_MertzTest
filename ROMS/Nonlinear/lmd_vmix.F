@@ -345,6 +345,13 @@
               lmd_iwm=lmd_iwm*100.0_r8
               lmd_iws=lmd_iws*100.0_r8
             endif
+# elif defined ICETEST2D
+            lmd_iwm=1.0E-3_r8
+            lmd_iws=5.0E-5_r8
+            if (bvf(i,j,k) .lt. 0.0_r8) then
+              lmd_iwm=lmd_iwm*100.0_r8
+              lmd_iws=lmd_iws*100.0_r8
+            endif
 # else
             lmd_iwm=1.0E-6_r8*cff
             lmd_iws=1.0E-7_r8*cff

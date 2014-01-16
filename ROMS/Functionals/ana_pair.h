@@ -109,6 +109,16 @@
 !          END IF
         END DO
       END DO
+#  elif defined ICETEST2D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.le.40) THEN
+            Pair(i,j)=500.0_r8
+          ELSE
+            Pair(i,j)=0.0_r8
+          END IF
+        END DO
+      END DO
 #else
       ana_pair.h: no values provided for Pair.
 #endif

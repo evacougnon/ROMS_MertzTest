@@ -411,6 +411,12 @@
       depth=500.0_r8
       f0=0.0_r8
       beta=0.0_r8
+#elif defined ICETEST2D
+      Xsize=20.0E+03_r8
+      Esize=500.0E+03_r8
+      depth=900.0_r8
+      f0=0.0_r8
+      beta=0.0_r8
 #else
       ana_grid.h: no values provided for Xsize, Esize, depth, f0, beta.
 #endif
@@ -556,6 +562,21 @@
           latp(i,j)=latv(i,j)
         END DO
       END DO
+#elif defined ICETEST2D
+      dx=Xsize/REAL(Lm(ng),r8)
+      dy=Esize/REAL(Mm(ng),r8)
+      DO j=Jmin,Jmax
+        DO i=Imin,Imax
+          xp(i,j)=dx*REAL(i-1,r8)
+          xr(i,j)=dx*(REAL(i-1,r8)+0.5_r8)
+          xu(i,j)=xp(i,j)
+          xv(i,j)=xr(i,j)
+          yp(i,j)=dy*REAL(j-1,r8)
+          yr(i,j)=dy*(REAL(j-1,r8)+0.5_r8)
+          yu(i,j)=yr(i,j)
+          yv(i,j)=yp(i,j)
+        END DO
+      END DO
 #else
       dx=Xsize/REAL(Lm(ng),r8)
       dy=Esize/REAL(Mm(ng),r8)
@@ -670,6 +691,14 @@
           wrkY(i,j)=val2
         END DO
       END DO
+# elif defined ICETEST2D
+     DO j=J_RANGE
+        DO i=I_RANGE
+          wrkX(i,j)=1.0_r8/dx
+          wrkY(i,j)=1.0_r8/dy
+        END DO
+      END DO
+# elif defined
 #else
       DO j=J_RANGE
         DO i=I_RANGE
@@ -1095,6 +1124,12 @@
           END IF
         END DO
       END DO
+# elif defined ICETEST2D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+         h(i,j)=900.0_r8
+        END DO
+      END DO
 #else
       DO j=JstrT,JendT
         DO i=IstrT,IendT
@@ -1187,9 +1222,9 @@
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           IF (j.eq.0) THEN
-            zice(i,j)=-500.0_r8
+            zice(i,j)=-700.0_r8
           ELSE IF (j.le.41) THEN
-            zice(i,j)=-400.0_r8+(400.0_r8/40.0_r8)*REAL(j-1,r8)
+            zice(i,j)=-700.0_r8+(500.0_r8/40.0_r8)*REAL(j-1,r8)
           ELSE
             zice(i,j)=0.0_r8
           END IF
@@ -1234,6 +1269,18 @@
 !          ELSE
 !            zice(i,j)=0.0_r8
 !          END IF
+        END DO
+      END DO
+#  elif defined ICETEST2D
+      DO j=JstrR,JendR
+        DO i=IstrR,IendR
+          IF (j.eq.0) THEN
+            zice(i,j)=-700.0_r8
+          ELSE IF (j.le.41) THEN
+            zice(i,j)=-700.0_r8+(500.0_r8/40.0_r8)*REAL(j-1,r8)
+          ELSE
+            zice(i,j)=0.0_r8
+          END IF
         END DO
       END DO
 # else
