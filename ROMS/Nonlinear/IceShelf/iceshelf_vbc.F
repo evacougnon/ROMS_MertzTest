@@ -242,7 +242,7 @@
         sfcSalt = saltMin + sRateInc * (tyear - 59.0_r8)
       ELSE IF (tyear.le.319.0_r8) THEN
         sfcTemp = Tmin
-        sfcSalt = saltMax + sRateDec * (259.0_r8 - tyear)
+        sfcSalt = saltMax + sRateDec * (259.0_r8 - tyear) + 0.7_r8
       ELSE
         sfcTemp = Tmax
         sfcSalt = saltMin
