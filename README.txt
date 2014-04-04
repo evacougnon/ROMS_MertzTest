@@ -1,5 +1,12 @@
 ROMS iceshelfBen's version -- romsiceshelf
 
+Created (03 April 2014) a new branch called Codes_edits to store/merge all the commits from Ben and David and tehn (later) push them slowly to the mertz branch (where I've adapted the domain to work on idealised simulations)
+
+** 03/04/2014 ** -- merge Ben master branch (updated version with modifications from Jan 2014 and April 2014, these last modifications (April) are following Dave's edits)
+
+
+FROM MASTER BRANCH:
+
 with typo corrections:
 
 ** 20/11/2013 -- modified from Dave's edits
