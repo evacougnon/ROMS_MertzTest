@@ -80,3 +80,18 @@
 #undef ANA_PSOURCE
 #undef TS_PSOURCE
 
+/* For boundary conditions */
+#undef ANA_FSOBC
+#define ANA_TOBC
+#undef ANA_M3OBC
+#undef ANA_M2OBC
+
+#define NORTH_TRADIATION
+#define NORTH_TNUDGING
+
+#define NORTH_FSRADIATION
+#define NORTH_M2RADIATION
+#define NORTH_M3RADIATION
+
+
+ 

@@ -195,15 +195,15 @@
 !  Local variable declarations.
 !
 # ifdef DISTRIBUTE
-#  ifdef EWperiodic
-      logical :: EWperiodic=.TRUE.
+#  ifdef EW_PERIODIC
+      logical :: EW_PERIODIC=.TRUE.
 #  else
-      logical :: EWperiodic=.FALSE.
+      logical :: EW_PERIODIC=.FALSE.
 #  endif
-#  ifdef NSperiodic
-      logical :: NSperiodic=.TRUE.
+#  ifdef NS_PERIODIC
+      logical :: NS_PERIODIC=.TRUE.
 #  else
-      logical :: NSperiodic=.FALSE.
+      logical :: NS_PERIODIC=.FALSE.
 #  endif
 # endif
 !      integer :: IstrR, IENDR, JstrR, JendR, IstrU, JstrV

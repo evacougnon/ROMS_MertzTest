@@ -94,7 +94,7 @@ GridsInLayer =  1
 
           Lm == 5            ! Number of I-direction INTERIOR RHO-points
           Mm == 100           ! Number of J-direction INTERIOR RHO-points
-           N == 11            ! Number of vertical levels
+           N == 5            ! Number of vertical levels
 
         Nbed =  0             ! Number of sediment bed layers
 
@@ -107,8 +107,8 @@ GridsInLayer =  1
 ! shared-memory configurations used to determine tile horizontal range
 ! indices (Istr,Iend) and (Jstr,Jend), [1:Ngrids].
 
-      NtileI == 1                               ! I-direction partition
-      NtileJ == 1                               ! J-direction partition
+      NtileI == 2                               ! I-direction partition
+      NtileJ == 2                               ! J-direction partition
 
 ! Set lateral boundary conditions keyword. Notice that a value is expected
 ! for each boundary segment per nested grid for each state variable.
@@ -146,28 +146,28 @@ GridsInLayer =  1
 !
 !                   1       2       3       4
 
-   LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
-   LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
-   LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D V-momentum
-   LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
-   LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
-   LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
+   LBC(isFsur) ==   Clo     Clo     Clo     Rad         ! free-surface
+   LBC(isUbar) ==   Clo     Clo     Clo     Rad         ! 2D U-momentum
+   LBC(isVbar) ==   Clo     Clo     Clo     Rad         ! 2D V-momentum
+   LBC(isUvel) ==   Clo     Clo     Clo     Rad         ! 3D U-momentum
+   LBC(isVvel) ==   Clo     Clo     Clo     Rad         ! 3D V-momentum
+   LBC(isMtke) ==   Clo     Clo     Clo     Rad         ! mixing TKE
 
-   LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
-                    Clo     Clo     Clo     Clo         ! salinity
+   LBC(isTvar) ==   Clo     Clo     Clo     RadNud \       ! temperature
+                    Clo     Clo     Clo     RadNud         ! salinity
 
 ! Adjoint-based algorithms can have different lateral boundary
 ! conditions keywords.
 
-ad_LBC(isFsur) ==   Clo     Clo     Clo     Clo         ! free-surface
-ad_LBC(isUbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
-ad_LBC(isVbar) ==   Clo     Clo     Clo     Clo         ! 2D U-momentum
-ad_LBC(isUvel) ==   Clo     Clo     Clo     Clo         ! 3D U-momentum
-ad_LBC(isVvel) ==   Clo     Clo     Clo     Clo         ! 3D V-momentum
-ad_LBC(isMtke) ==   Clo     Clo     Clo     Clo         ! mixing TKE
+ad_LBC(isFsur) ==   Clo     Clo     Clo     Rad         ! free-surface
+ad_LBC(isUbar) ==   Clo     Clo     Clo     Rad         ! 2D U-momentum
+ad_LBC(isVbar) ==   Clo     Clo     Clo     Rad         ! 2D U-momentum
+ad_LBC(isUvel) ==   Clo     Clo     Clo     Rad         ! 3D U-momentum
+ad_LBC(isVvel) ==   Clo     Clo     Clo     Rad         ! 3D V-momentum
+ad_LBC(isMtke) ==   Clo     Clo     Clo     Rad         ! mixing TKE
 
-ad_LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
-                    Clo     Clo     Clo     Clo         ! salinity
+ad_LBC(isTvar) ==   Clo     Clo     Clo     RadNud \       ! temperature
+                    Clo     Clo     Clo     RadNud         ! salinity
 
 ! Set lateral open boundary edge volume conservation switch for
 ! nonlinear model and adjoint-based algorithms. Usually activated
@@ -177,16 +177,16 @@ ad_LBC(isTvar) ==   Clo     Clo     Clo     Clo \       ! temperature
    VolCons(west)  ==  F                            ! western  boundary
    VolCons(east)  ==  F                            ! eastern  boundary
    VolCons(south) ==  F                            ! southern boundary
-   VolCons(north) ==  F                            ! northern boundary
+   VolCons(north) ==  T                            ! northern boundary
 
 ad_VolCons(west)  ==  F                            ! western  boundary
 ad_VolCons(east)  ==  F                            ! eastern  boundary
 ad_VolCons(south) ==  F                            ! southern boundary
-ad_VolCons(north) ==  F                            ! northern boundary
+ad_VolCons(north) ==  T                            ! northern boundary
 
 ! Time-Stepping parameters.
 
-      NTIMES == 172800  !!!86400
+      NTIMES == 420768  !!172800  !!!86400
           DT == 300d0
      NDTFAST == 30
 
@@ -234,8 +234,8 @@ ad_VolCons(north) ==  F                            ! northern boundary
    LcycleADJ == F
         NADJ == 864
      NDEFADJ == 0
-        NSFF == 864
-        NOBC == 864
+        NSFF == 1461
+        NOBC == 1461
 
 ! GST output and check pointing restart parameters.
 
@@ -361,7 +361,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Nudging/relaxation time scales, inverse scales will be computed
 ! internally, [1:Ngrids].
 
-       TNUDG == 2*0.0d0                    ! days
+       TNUDG == 2*30.0d0                    ! days
        ZNUDG == 0.0d0                      ! days
       M2NUDG == 0.0d0                      ! days
       M3NUDG == 0.0d0                      ! days
@@ -370,7 +370,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! conditions, [1:Ngrids]. If OBCFAC > 1, nudging on inflow is stronger
 ! than on outflow (recommended).
 
-      OBCFAC == 0.0d0                      ! nondimensional
+      OBCFAC == 10.0d0                      ! nondimensional
 
 ! Linear equation of State parameters:
 

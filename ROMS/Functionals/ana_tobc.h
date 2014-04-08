@@ -219,6 +219,17 @@
         END DO
       END IF
 
+#elif defined ICETEST2D
+      IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                     &
+     &    DOMAIN(ng)%Northern_Edge(tile)) THEN
+        DO k=1,N(ng)
+          DO i=IstrT,IendT
+            BOUNDARY(ng)%t_north(i,k,itemp)=1.0_r8
+            BOUNDARY(ng)%t_north(i,k,isalt)=34.7_r8
+          END DO
+        END DO
+      END IF
+
 #else
       IF (ANY(LBC(ieast,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Eastern_Edge(tile)) THEN
