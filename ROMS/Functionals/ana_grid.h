@@ -406,15 +406,15 @@
       f0=0.0_r8
       beta=0.0_r8
 #elif defined MERTZ_TEST
-      Xsize=350.0E+03_r8
-      Esize=390.0E+03_r8
-      depth=500.0_r8
+      Xsize=700.0E+03_r8
+      Esize=500.0E+03_r8
+      depth=600.0_r8
       f0=0.0_r8
       beta=0.0_r8
 #elif defined ICETEST2D
-      Xsize=20.0E+03_r8
+      Xsize=50.0E+03_r8
       Esize=500.0E+03_r8
-      depth=900.0_r8
+      depth=600.0_r8
       f0=0.0_r8
       beta=0.0_r8
 #else
@@ -1101,32 +1101,31 @@
       DO j=JstrR,JendR
         DO i=IstrR,IendR
          h(i,j)=20.0_r8+REAL(j,r8)*(depth/Esize)*(Esize/REAL(Mm(ng),r8))
-       write(6,*) h(i,j)
         END DO
       END DO
 # elif defined MERTZ_TEST
-!      DO j=JstrR,JendR
-!        DO i=IstrR,IendR
-!          h(i,j)=500.0_r8
-!        END DO
-!      END DO
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          IF (j.le.44) THEN
-            h(i,j)=500.0_r8
-          ELSE IF (j.le.59) THEN
-            h(i,j)=atan(REAL(j-52,r8))*(2175.0_r8/pi)                  &
-     &             +atan(7.0_r8)*(2175.0_r8/pi)+500.0_r8+pi
-!            h(i,j)=500.0_r8+(2000.0_r8/10.0_r8)*REAL(j-45,r8)
-          ELSE
-            h(i,j)=2500.0_r8
-          END IF
+          h(i,j)=600.0_r8
         END DO
       END DO
+!      DO j=JstrR,JendR
+!        DO i=IstrR,IendR
+!          IF (j.le.44) THEN
+!            h(i,j)=500.0_r8
+!          ELSE IF (j.le.59) THEN
+!            h(i,j)=atan(REAL(j-52,r8))*(2175.0_r8/pi)                  &
+!     &             +atan(7.0_r8)*(2175.0_r8/pi)+500.0_r8+pi
+!!            h(i,j)=500.0_r8+(2000.0_r8/10.0_r8)*REAL(j-45,r8)
+!          ELSE
+!            h(i,j)=2500.0_r8
+!          END IF
+!        END DO
+!      END DO
 # elif defined ICETEST2D
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-         h(i,j)=900.0_r8
+         h(i,j)=600.0_r8
         END DO
       END DO
 #else
@@ -1245,19 +1244,22 @@
          zice(i,j)=-(h(i,60)                                           &
      &             -atan(REAL(j-59,r8)/10)*(h(i,60)-300_r8))           &
      &             + 20_r8    
-!         write(6,*) zice(i,j) 
           END IF
         END DO
       END DO
 #  elif defined MERTZ_TEST
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          IF ((i.gt.29).and.(i.lt.38).and.(j.eq.0)) THEN
-            zice(i,j)=-450.0_r8
-          ELSE IF ((i.gt.29).and.(i.lt.38).and.(j.le.32)) THEN
-            zice(i,j)=atan(0.3_r8*REAL(j-8,r8))*(500.0_r8/pi)          &
-     &                + atan(7.0_r8)*(500.0_r8/pi)-500.0_r8+pi
-!            zice(i,j)=-400.0_r8+(400.0_r8/31.0_r8)*REAL(j-1,r8)
+!          IF ((i.gt.29).and.(i.lt.38).and.(j.eq.0)) THEN
+!            zice(i,j)=-450.0_r8
+!          ELSE IF ((i.gt.29).and.(i.lt.38).and.(j.le.32)) THEN
+!            zice(i,j)=atan(0.3_r8*REAL(j-8,r8))*(500.0_r8/pi)          &
+!     &                + atan(7.0_r8)*(500.0_r8/pi)-500.0_r8+pi
+!!            zice(i,j)=-400.0_r8+(400.0_r8/31.0_r8)*REAL(j-1,r8)
+          IF (j.eq.0) THEN
+            zice(i,j)=-550.0_r8
+          ELSE IF (j.le.31) THEN
+            zice(i,j)=-550.0_r8+(350.0_r8/30.0_r8)*REAL(j-1,r8)
           ELSE
             zice(i,j)=0.0_r8
           END IF
@@ -1274,9 +1276,9 @@
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           IF (j.eq.0) THEN
-            zice(i,j)=-700.0_r8
-          ELSE IF (j.le.41) THEN
-            zice(i,j)=-700.0_r8+(500.0_r8/40.0_r8)*REAL(j-1,r8)
+            zice(i,j)=-450.0_r8
+          ELSE IF (j.le.11) THEN
+            zice(i,j)=-450.0_r8+(450.0_r8/10.0_r8)*REAL(j-1,r8)
           ELSE
             zice(i,j)=0.0_r8
           END IF
