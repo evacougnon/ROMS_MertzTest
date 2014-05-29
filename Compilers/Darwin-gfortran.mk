@@ -43,20 +43,20 @@
 
 ifdef USE_NETCDF4
         NC_CONFIG ?= nc-config
-    NETCDF_INCDIR ?= $(shell $(NC_CONFIG) --prefix)/include
-             LIBS := $(shell $(NC_CONFIG) --flibs)
+    NETCDF_INCDIR ?= /opt/gfortransoft/serial/netcdf4/include
+             LIBS := /opt/gfortransoft/serial/netcdf4/lib
 else
-    NETCDF_INCDIR ?= /usr/local/include
-    NETCDF_LIBDIR ?= /usr/local/lib
+    NETCDF_INCDIR ?= /opt/gfortransoft/serial/netcdf3/include
+    NETCDF_LIBDIR ?= /opt/gfortransoft/serial/netcdf3/lib
              LIBS := -L$(NETCDF_LIBDIR) -lnetcdf
 endif
 
 ifdef USE_ARPACK
  ifdef USE_MPI
-   PARPACK_LIBDIR ?= /usr/local/lib
+   PARPACK_LIBDIR ?= /opt/gfortransoft/openmpi/lib
              LIBS += -L$(PARPACK_LIBDIR) -lparpack
  endif
-    ARPACK_LIBDIR ?= /usr/local/lib
+    ARPACK_LIBDIR ?= /opt/gfortransoft/openmpi/lib
              LIBS += -L$(ARPACK_LIBDIR) -larpack
 endif
 

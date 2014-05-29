@@ -698,7 +698,6 @@
           wrkY(i,j)=1.0_r8/dy
         END DO
       END DO
-# elif defined
 #else
       DO j=J_RANGE
         DO i=I_RANGE
