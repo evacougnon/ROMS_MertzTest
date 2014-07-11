@@ -56,7 +56,9 @@
       USE mod_iceshelf
       USE mod_coupling
       USE mod_stepping
+!#ifdef ICESHELF_MORPH
       USE mod_iceshelfvar
+!#endif
 !
       implicit none
 !
@@ -71,9 +73,7 @@
      &                   LBi, UBi, LBj, UBj,                            &
      &                   IminS, ImaxS, JminS, JmaxS,                    &
      &                   nrhs(ng), nnew(ng),                            &
-#if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
      &                   GRID(ng) % Hz,                                 &
-#endif
      &                   GRID(ng) % z_r,                                &
      &                   GRID(ng) % z_w,                                &
      &                   GRID(ng) % zice,                               &
@@ -84,12 +84,10 @@
      &                   OCEAN(ng) % u,                                 &
      &                   OCEAN(ng) % v,                                 &
      &                   OCEAN(ng) % t,                                 &
-#ifdef ICESHELF_3EQN_VBC
      &                   ICESHELFVAR(ng) % gammaT,                      &
      &                   ICESHELFVAR(ng) % gammaS,                      &
      &                   ICESHELFVAR(ng) % Tb,                          &
      &                   ICESHELFVAR(ng) % Sb,                          &
-#endif
      &                   ICESHELFVAR(ng) % m,                           &
      &                   OCEAN(ng) % rho,                               &
      &                   FORCES(ng) % sustr,                            &
@@ -109,21 +107,15 @@
       SUBROUTINE iceshelf_vbc_tile (ng, tile,                           &
      &                         LBi, UBi, LBj, UBj,                      &
      &                         IminS, ImaxS, JminS, JmaxS,              &
-     &                         nrhs,nnew,                               &
-#if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
-     &                         Hz,                                      &
-#endif
+     &                         nrhs,nnew,Hz,                            &
      &                         z_r, z_w,                                &
      &                         zice,f,                                  &
 # ifdef ICESHELF_MORPH
      &                         iceshelf_draft,                          &
 # endif
      &                         u, v, t,                                 &
-#ifdef ICESHELF_3EQN_VBC
      &                         gammaT, gammaS,                          &
-     &                         Tb, Sb,                                  &
-#endif 
-     &                         m, rho,                                  &
+     &                         Tb, Sb, m, rho,                          &
      &                         sustr, svstr,                            &
 #   ifdef SHORTWAVE
      &                         srflx,                                   &
@@ -150,15 +142,14 @@
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
       integer, intent(in) :: nrhs,nnew
+      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
+
 # ifdef ASSUMED_SHAPE
       real(r8), intent(in) :: u(LBi:,LBj:,:,:)
       real(r8), intent(in) :: v(LBi:,LBj:,:,:)
       real(r8), intent(out) :: sustr(LBi:,LBj:)
       real(r8), intent(out) :: svstr(LBi:,LBj:)
       real(r8), intent(in) :: rho(LBi:,LBj:,:)
-#if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
-      real(r8), intent(in) :: Hz(LBi:,LBj:,:)
-#endif
       real(r8), intent(in) :: z_r(LBi:,LBj:,:)
       real(r8), intent(in) :: z_w(LBi:,LBj:,0:)
       real(r8), intent(in) :: zice(LBi:,LBj:)
@@ -167,12 +158,10 @@
       real(r8), intent(inout) :: iceshelf_draft(LBi:,LBj:,:)
 #endif
       real(r8), intent(in) :: t(LBi:,LBj:,:,:,:)
-#ifdef ICESHELF_3EQN_VBC
       real(r8), intent(out) :: gammaT(LBi:,LBj:)
       real(r8), intent(out) :: gammaS(LBi:,LBj:)
       real(r8), intent(out) :: Tb(LBi:,LBj:)
       real(r8), intent(out) :: Sb(LBi:,LBj:)
-#endif
       real(r8), intent(out) :: m(LBi:,LBj:)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:,LBj:)
@@ -184,9 +173,6 @@
       real(r8), intent(out) :: sustr(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: svstr(LBi:UBi,LBj:UBj)
       real(r8), intent(in) :: rho(LBi:UBi,LBj:UBj,N(ng))
-#if defined ICESHELF_3EQN_VBC || defined ANA_SEAICE
-      real(r8), intent(in) :: Hz(LBi:UBi,LBj:UBj,N(ng))
-#endif
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: z_w(LBi:UBi,LBj:UBj,0:N(ng))
       real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
@@ -195,12 +181,10 @@
       real(r8), intent(in) :: iceshelf_draft(LBi:UBi,LBj:UBj,2)
 #endif
       real(r8), intent(in) :: t(LBi:UBi,LBj:UBj,N(ng),3,NT(ng))
-#ifdef ICESHELF_3EQN_VBC
       real(r8), intent(out) :: gammaT(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: gammaS(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: Tb(LBi:UBi,LBj:UBj)
       real(r8), intent(out) :: Sb(LBi:UBi,LBj:UBj)
-#endif
       real(r8), intent(out) :: m(LBi:UBi,LBj:UBj)
 # ifdef SHORTWAVE
       real(r8), intent(inout) :: srflx(LBi:UBi,LBj:UBj)
@@ -210,6 +194,18 @@
 !
 !  Local variable declarations.
 !
+# ifdef DISTRIBUTE
+#  ifdef EW_PERIODIC
+      logical :: EW_PERIODIC=.TRUE.
+#  else
+      logical :: EW_PERIODIC=.FALSE.
+#  endif
+#  ifdef NS_PERIODIC
+      logical :: NS_PERIODIC=.TRUE.
+#  else
+      logical :: NS_PERIODIC=.FALSE.
+#  endif
+# endif
 !      integer :: IstrR, IENDR, JstrR, JendR, IstrU, JstrV
       integer :: i, j, itrc
       real(r8) :: Pradj,Scadj, Cdrt, cp_i
@@ -230,126 +226,6 @@
       real(r8), dimension(PRIVATE_2D_SCRATCH_ARRAY) :: wrk
 #  endif
 #  include "set_bounds.h"
-!
-!-----------------------------------------------------------------------
-!  If ice shelf cavities, replace surface wind stress with ice shelf
-!  cavity stress (m2/s2).
-!-----------------------------------------------------------------------
-
-#   if defined UV_LOGDRAG
-!
-!  Set logarithmic ice shelf cavity stress.
-!
-      DO j=JstrV-1,JEND
-        DO i=IstrU-1,IEND
-          cff1=1.0_r8/LOG((z_w(i,j,N(ng))-z_r(i,j,N(ng)))/Zob(ng))
-          cff2=vonKar*vonKar*cff1*cff1
-          wrk(i,j)=MIN(Cdb_max,MAX(Cdb_min,cff2))
-        END DO
-      END DO
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
-            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
-            sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                   &
-     &                 u(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
-            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
-            svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                   &
-     &                 v(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-#   elif defined UV_QDRAG
-!
-!  Set quadratic ice shelf cavity stress.
-!
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
-            cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
-            sustr(i,j)=-rdrg2(ng)*u(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
-            cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
-            svstr(i,j)=-rdrg2(ng)*v(i,j,N(ng),nrhs)*cff2
-          END IF
-        END DO
-      END DO
-#   elif defined UV_LDRAG
-!
-!  Set linear ice shelf cavity stress.
-!
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            sustr(i,j)=-rdrg(ng)*u(i,j,N(ng),nrhs)
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            svstr(i,j)=-rdrg(ng)*v(i,j,N(ng),nrhs)
-          END IF
-        END DO
-      END DO
-#   else
-      DO j=Jstr,JEND
-        DO i=IstrU,IEND
-          IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            sustr(i,j)=0.0_r8
-          END IF
-        END DO
-      END DO
-      DO j=JstrV,JEND
-        DO i=Istr,IEND
-          IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            svstr(i,j)=0.0_r8
-          END IF
-        END DO
-      END DO
-#   endif
-!
-!  Apply boundary conditions.
-!
-      CALL bc_u2d_tile (ng, tile,                                       &
-     &                          LBi, UBi, LBj, UBj,                     &
-     &                          sustr)
-      CALL bc_v2d_tile (ng, tile,                                       &
-     &                          LBi, UBi, LBj, UBj,                     &
-     &                          svstr)
-#ifdef DISTRIBUTE
-      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    sustr,svstr)
-#endif
 !-----------------------------------------------------------------------
 !  If ice shelf cavities, zero out for now the surface tracer flux
 !  over the ice.
@@ -358,19 +234,40 @@
 #    ifdef ANA_SEAICE
 ! Analytical sea-ice forcing in the open water areas
       tyear = MOD(tdays(ng)-DSTART,365.25_r8)
-      IF (tyear.le.59.0_r8) THEN
-        sfcTemp = Tmax
-        sfcSalt = saltMin
-      ELSE IF (tyear.le.259.0_r8) THEN
-        sfcTemp = Tmin
-        sfcSalt = saltMin + sRateInc * (tyear - 59.0_r8)
-      ELSE IF (tyear.le.319.0_r8) THEN
-        sfcTemp = Tmin
-        sfcSalt = saltMax + sRateDec * (259.0_r8 - tyear) + 0.7_r8
-      ELSE
-        sfcTemp = Tmax
-        sfcSalt = saltMin
-      endif
+#if defined ICETEST2D || defined MERTZ_TEST  
+!           sfcTemp = -1.95_r8  !Tmin
+!           sfcSalt = 35.5_r8   !saltMax 
+           IF (tyear.le.31.0_r8) THEN
+           sfcTemp = Tmin
+           sfcSalt = saltMax - sRateDec * (62.0_r8 + (tyear - 30.0_r8));
+           ELSE IF (tyear.le.120.0_r8) THEN
+           sfcTemp = Tmax
+           sfcSalt = saltMin
+           ELSE IF (tyear.le.273.0_r8) THEN
+           sfcTemp = Tmin
+           sfcSalt = saltMin + sRateInc * (tyear - 120.0_r8)
+           ELSE IF (tyear.le.334.0_r8) THEN
+           sfcTemp = Tmin
+           sfcSalt = saltMax
+           ELSE
+           sfcTemp = Tmin
+           sfcSalt = saltMax - sRateDec * (tyear - 334.0_r8)
+           endif
+#         else      
+           IF (tyear.le.59.0_r8) THEN
+           sfcTemp = Tmax
+           sfcSalt = saltMin
+           ELSE IF (tyear.le.259.0_r8) THEN
+           sfcTemp = Tmin
+           sfcSalt = saltMin + sRateInc * (tyear - 59.0_r8)
+           ELSE IF (tyear.le.319.0_r8) THEN
+           sfcTemp = Tmin
+           sfcSalt = saltMax + sRateDec * (259.0_r8 - tyear) + 0.7_r8
+           ELSE
+           sfcTemp = Tmax
+           sfcSalt = saltMin
+           endif 
+#         endif
 #    endif
 !
 !-----------------------------------------------------------------------
@@ -392,26 +289,26 @@
       DO j=Jstr,JEND
         DO i=IstrU,IEND
           IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                       &
+      &                    v(i  ,j+1,N(ng),nrhs)+                      &
+      &                    v(i-1,j  ,N(ng),nrhs)+                      &
+      &                    v(i-1,j+1,N(ng),nrhs))
             cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
-            sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                   &
-     &                 u(i,j,N(ng),nrhs)*cff2
+            sustr(i,j)=-0.5_r8*(wrk(i-1,j)+wrk(i,j))*                  &
+      &                 u(i,j,N(ng),nrhs)*cff2
           END IF
         END DO
       END DO
       DO j=JstrV,JEND
         DO i=Istr,IEND
           IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                       &
+      &                    u(i+1,j  ,N(ng),nrhs)+                      &
+      &                    u(i  ,j-1,N(ng),nrhs)+                      &
+      &                    u(i+1,j-1,N(ng),nrhs))
             cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
-            svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                   &
-     &                 v(i,j,N(ng),nrhs)*cff2
+            svstr(i,j)=-0.5_r8*(wrk(i,j-1)+wrk(i,j))*                  &
+      &                 v(i,j,N(ng),nrhs)*cff2
           END IF
         END DO
       END DO
@@ -423,10 +320,10 @@
       DO j=Jstr,JEND
         DO i=IstrU,IEND
           IF (zice(i,j)*zice(i-1,j).ne.0.0_r8) THEN
-            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                        &
-     &                    v(i  ,j+1,N(ng),nrhs)+                        &
-     &                    v(i-1,j  ,N(ng),nrhs)+                        &
-     &                    v(i-1,j+1,N(ng),nrhs))
+            cff1=0.25_r8*(v(i  ,j  ,N(ng),nrhs)+                       &
+      &                    v(i  ,j+1,N(ng),nrhs)+                      &
+      &                    v(i-1,j  ,N(ng),nrhs)+                      &
+      &                    v(i-1,j+1,N(ng),nrhs))
             cff2=SQRT(u(i,j,N(ng),nrhs)*u(i,j,N(ng),nrhs)+cff1*cff1)
             sustr(i,j)=-rdrg2(ng)*u(i,j,N(ng),nrhs)*cff2
           END IF
@@ -435,10 +332,10 @@
       DO j=JstrV,JEND
         DO i=Istr,IEND
           IF (zice(i,j)*zice(i,j-1).ne.0.0_r8) THEN
-            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                        &
-     &                    u(i+1,j  ,N(ng),nrhs)+                        &
-     &                    u(i  ,j-1,N(ng),nrhs)+                        &
-     &                    u(i+1,j-1,N(ng),nrhs))
+            cff1=0.25_r8*(u(i  ,j  ,N(ng),nrhs)+                       &
+      &                    u(i+1,j  ,N(ng),nrhs)+                      &
+      &                    u(i  ,j-1,N(ng),nrhs)+                      &
+      &                    u(i+1,j-1,N(ng),nrhs))
             cff2=SQRT(cff1*cff1+v(i,j,N(ng),nrhs)*v(i,j,N(ng),nrhs))
             svstr(i,j)=-rdrg2(ng)*v(i,j,N(ng),nrhs)*cff2
           END IF
@@ -482,18 +379,20 @@
 #    endif
  
 #    ifdef ICESHELF_3EQN_VBC
-     Pradj = 12.5_r8*(Pr**(2/3))
-     Scadj = 12.5_r8*(Sc**(2/3))
-     Cdrt =  sqrt(Cd)
-     cp_i =  152.5_r8+7.122_r8*(273.15_r8+Ti)
-     rhoi_on_rho0 = rho_i/rho0
+      Pradj = 12.5_r8*(Pr**(2/3))
+      Scadj = 12.5_r8*(Sc**(2/3))
+      Cdrt =  sqrt(Cd)
+      cp_i =  152.5_r8+7.122_r8*(273.15_r8+Ti)
+      rhoi_on_rho0 = rho_i/rho0
 #    endif
 
-     DO j=Jstr,JEND
+      DO j=Jstr,JEND
        DO i=Istr,IEND
 # ifdef SALINITY
-          Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
-!          write(6,*)
+!         Sm=35.5_r8
+!         Tm=-1.95_r8         
+         Sm=MAX(0.0_r8,t(i,j,N(ng),nrhs,isalt))
+!         write(6,*)
 # else
          Sm=0.0_r8
 # endif
@@ -506,9 +405,13 @@
 # else
         CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),-zice(i,j),0.0_r8,Tm,i,j)
 # endif
-            stflx(i,j,itemp)=gamma*(TFb-Tm)
-            stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
-            m(i,j) = stflx(i,j,isalt)/Sm
+!           write(6,*) gamma,TFb,Tm
+           stflx(i,j,itemp)=gamma*(TFb-Tm)
+           stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/L
+#  ifdef ICESHELF_MORPH
+           m(i,j) = stflx(i,j,isalt)/Sm
+           write(6,*) m(i,j),Sm
+#  endif
 
 #elif defined ICESHELF_3EQN_VBC
 ! Get the insitu salinity and temperature
@@ -520,11 +423,12 @@
 # endif
 
 !    Calculate exchange coefficients. Note that this assumes log profile 
-            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+    &
-     &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
-#    ifdef MASKING
-            ustar = ustar*rmask(i,j)
-#    endif
+!            ustar = 1.0e-5_r8
+            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+   &
+      &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
+!#    ifdef MASKING
+!            ustar = ustar*rmask(i,j)
+!#    endif
 
           if(ustar.lt.small) ustar = small
 #    ifdef GAMMAS_KY1972
@@ -533,7 +437,7 @@
            gammaS(i,j) = ustar/(turb + Scadj - 9.0_r8)
 #    elif defined GAMMAS_Mc1987
 ! Uses simplified version of McPhee 1987
-           IF (ustar.gt.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
+           IF (ustar.ge.small.and.ABS(f(i,j)).gt.1.0E-8) THEN
              turb = 2.5*LOG(5300.0_r8*ustar*ustar/ABS(f(i,j))) + 7.12  
            ELSE
              turb = 0.0_r8
@@ -606,17 +510,17 @@
 
 ! Calculate coefficents in quadratic to be solved:
            cff1 = L/cp_w + mflag*(cp_i/cp_w)*(TFi-Ti)
-           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))     &
-     &          + gammaT(i,j)*(TFi-Tm)
+           cff2 = gammaS(i,j)*(L/cp_w + mflag*(cp_i/cp_w)*(TFb-Ti))    &
+      &          + gammaT(i,j)*(TFi-Tm)
            cff3 = gammaS(i,j)*gammaT(i,j)*(TFb - Tm)
 
 ! Calculate melt rate:
            m(i,j) = -(cff2 - SQRT(cff2*cff2 - 4*cff1*cff3))/(2*cff1)
 
 ! Calculate basal temperature and salinity:
-           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti        &
-     &             - (L/cp_w)*m(i,j))                                   &
-     &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
+           Tb(i,j) = (gammaT(i,j)*Tm+mflag*(cp_i/cp_w)*m(i,j)*Ti       &
+      &             - (L/cp_w)*m(i,j))                                 &
+      &             /(gammaT(i,j) + mflag*(cp_i/cp_w)*m(i,j))
            Sb(i,j) = (Tb(i,j) - b - c*zice(i,j))/a
 
          stflx(i,j,itemp)=(gammaT(i,j)+rhoi_on_rho0*m(i,j))*(Tb(i,j)-Tm)
@@ -626,21 +530,31 @@
 
 #else
       DO itrc=1,NT(ng)
+!        DO j=JstrR,JENDR
+!          DO i=IstrR,IENDR
+!            IF (zice(i,j).ne.0.0_r8) THEN
               stflx(i,j,itrc)=0.0_r8
       END DO
 #endif
           ELSE
             m(i,j) = 0.0_r8
 # if defined ANA_SEAICE
-            stflx(i,j,itemp)=Hz(i,j,N(ng))*                             &
+            stflx(i,j,itemp)=Hz(i,j,N(ng))*                            &
                              (sfcTemp-t(i,j,N(ng),nrhs,itemp))/trelax
-            stflx(i,j,isalt)=Hz(i,j,N(ng))*                             &
+            stflx(i,j,isalt)=Hz(i,j,N(ng))*                            &
                              (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
 # else
           DO itrc=1,NT(ng)
              stflx(i,j,itrc)=0.0_r8
           END DO
 # endif
+
+!          END IF
+!        END DO
+!      END DO
+
+!#endif
+
           END IF
         END DO
       END DO
@@ -652,8 +566,8 @@
 # if defined ICESHELF_MORPH
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          iceshelf_draft(i,j,nnew)=zice(i,j)-                           &
-     &                             MIN(m(i,j)*dt(ng),1.0e-3_r8) 
+          iceshelf_draft(i,j,nnew)=zice(i,j)-                          &
+      &                             MIN(m(i,j)*dt(ng),1.0e-3_r8) 
           IF(i.eq.40.and.j.eq.40) THEN
           write(6,*) m(i,j),zice(i,j),iceshelf_draft(i,j,nnew) 
           ENDIF
@@ -661,31 +575,12 @@
       END DO
 
         IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
-          CALL exchange_r2d_tile (ng, tile,                             &
-     &                            LBi, UBi, LBj, UBj,                   &
-     &                            iceshelf_draft(:,:,nnew))
+          CALL exchange_r2d_tile (ng, tile,                            &
+      &                            LBi, UBi, LBj, UBj,                 &
+      &                            iceshelf_draft(:,:,nnew))
         END IF
 # endif
 
-!
-!  Apply gradient or periodic boundary conditions for the two fluxes
-!
-      CALL bc_r2d_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj,                             &
-     &                  stflx(:,:,itemp))
-      CALL bc_r2d_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj,                             &
-     &                  stflx(:,:,isalt))
-#    ifdef DISTRIBUTE
-      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    stflx(:,:,itemp))
-      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj,                           &
-     &                    NghostPoints, EWperiodic(ng), NSperiodic(ng), &
-     &                    stflx(:,:,isalt))
-#    endif
 #   ifdef SHORTWAVE
       DO j=JstrR,JENDR
         DO i=IstrR,IENDR
@@ -695,6 +590,21 @@
         END DO
       END DO
 #   endif
+!
+!  Apply boundary conditions.
+!
+      CALL bc_u2d_tile (ng, tile,                                      &
+      &                          LBi, UBi, LBj, UBj,                   &
+      &                          sustr)
+      CALL bc_v2d_tile (ng, tile,                                      &
+      &                          LBi, UBi, LBj, UBj,                   &
+      &                          svstr)
+#ifdef DISTRIBUTE
+      CALL mp_exchange2d (ng, tile, iNLM, 2,                           &
+      &                   LBi, UBi, LBj, UBj,                          &
+      &                   NghostPoints, EWperiodic(ng), NSperiodic(ng),&
+      &                   sustr,svstr)
+#endif
       RETURN
       END SUBROUTINE iceshelf_vbc_tile
 
@@ -815,13 +725,13 @@
       implicit real*8(a-h,o-z)
       integer :: nloops, n
 
-      th0 = t+(p-pr)*( 8.65483913395442d-6   -                          &
-     &             s*  1.41636299744881d-6   -                          &
-     &        (p+pr)*  7.38286467135737d-9   +                          &
-     &             t*(-8.38241357039698d-6   +                          &
-     &             s*  2.83933368585534d-8   +                          &
-     &             t*  1.77803965218656d-8   +                          &
-     &          (p+pr)*  1.71155619208233d-10))
+      th0 = t+(p-pr)*( 8.65483913395442d-6   -                         &
+      &             s*  1.41636299744881d-6   -                        &
+      &        (p+pr)*  7.38286467135737d-9   +                        &
+      &             t*(-8.38241357039698d-6   +                        &
+      &             s*  2.83933368585534d-8   +                        &
+      &             t*  1.77803965218656d-8   +                        &
+      &          (p+pr)*  1.71155619208233d-10))
       de_dt = 13.6d0
       nloops = 2                                      ! default
 !    NOTE: nloops = 1 gives theta with a maximum error of 5.48x10^-06
@@ -859,83 +769,83 @@
       real*8 kTp
 
       x2 = 2.5d-2*s; x = sqrt(x2); y = 2.5d-2*th0; z = 1.0d-4*pr; z1 = z
-      fTp = -5.90578348518236d0 + y*(24715.571866078d0 +                &
-     &         y*(-2210.2236124548363d0 + y*(592.743745734632d0 +       &
-     &         y*(-290.12956292128547d0 + (113.90630790850321d0 -       &
-     &                               21.35571525415769d0*y)*y))))
-      gTp = y*(-1858.920033948178d0 + y*(781.281858144429d0 +           &
-     &                y*(-388.6250910633612d0 + 87.18719211065d0*y)))
-      hTp = y*(317.440355256842d0 + y*(-202.5696441786141d0 +           &
+      fTp = -5.90578348518236d0 + y*(24715.571866078d0 +               &
+      &         y*(-2210.2236124548363d0 + y*(592.743745734632d0 +     &
+      &         y*(-290.12956292128547d0 + (113.90630790850321d0 -     &
+      &                               21.35571525415769d0*y)*y))))
+      gTp = y*(-1858.920033948178d0 + y*(781.281858144429d0 +          &
+      &                y*(-388.6250910633612d0 + 87.18719211065d0*y)))
+      hTp = y*(317.440355256842d0 + y*(-202.5696441786141d0 +          &
                                          67.5605099586024d0*y))
       if(z.ne.0.d0) then
         yz = y*z
-        fTp = fTp + z*(270.983805184062d0 + z*(-776.153611613101d0 +    &
-     &               z*(196.51255088122d0 + z*(-28.9796526294175d0 +    &
-     &       2.13290083518327d0*z)))) + y*(z*(-2910.0729080936d0 +      &
-     &           z*(1513.116771538718d0 + z*(-546.959324647056d0 +      &
-     &         (111.1208127634436d0 - 8.68841343834394d0*z)*z))) +      &
-     &        y*(z*(2017.52334943521d0 + z*(-1498.081172457456d0 +      &
-     &          z*(718.6359919632359d0 + z*(-146.4037555781616d0 +      &
-     &   4.9892131862671505d0*z)))) + y*(z*(-1591.873781627888d0 +      &
-     &           z*(1207.261522487504d0 + z*(-608.785486935364d0 +      &
-     &  105.4993508931208d0*z))) + y*(y*(67.41756835751434d0*y*z +      &
-     &           z*(-381.06836198507096d0 + (133.7383902842754d0 -      &
-     &       49.023632509086724d0*z)*z)) + z*(973.091553087975d0 +      &
-     &              z*(-602.603274510125d0 + (276.361526170076d0 -      &
+        fTp = fTp + z*(270.983805184062d0 + z*(-776.153611613101d0 +   &
+      &               z*(196.51255088122d0 + z*(-28.9796526294175d0 +  &
+      &       2.13290083518327d0*z)))) + y*(z*(-2910.0729080936d0 +    &
+      &           z*(1513.116771538718d0 + z*(-546.959324647056d0 +    &
+      &         (111.1208127634436d0 - 8.68841343834394d0*z)*z))) +    &
+      &        y*(z*(2017.52334943521d0 + z*(-1498.081172457456d0 +    &
+      &          z*(718.6359919632359d0 + z*(-146.4037555781616d0 +    &
+      &   4.9892131862671505d0*z)))) + y*(z*(-1591.873781627888d0 +    &
+      &           z*(1207.261522487504d0 + z*(-608.785486935364d0 +    &
+      &  105.4993508931208d0*z))) + y*(y*(67.41756835751434d0*y*z +    &
+      &           z*(-381.06836198507096d0 + (133.7383902842754d0 -    &
+      &       49.023632509086724d0*z)*z)) + z*(973.091553087975d0 +    &
+      &              z*(-602.603274510125d0 + (276.361526170076d0 -    &
                                  32.40953340386105d0*z)*z))))))
-        gTp = gTp + z*(-729.116529735046d0 + z*(343.956902961561d0 +    &
-     &               z*(-124.687671116248d0 + (31.656964386073d0 -      &
-     &    7.04658803315449d0*z)*z))) + y*(z*(1721.528607567954d0 +      &
-     &            z*(-674.819060538734d0 + z*(356.629112415276d0 +      &
-     &           z*(-88.4080716616d0 + 15.84003094423364d0*z)))) +      &
-     &      y*(y*z*(1190.914967948748d0 + z*(-298.904564555024d0 +      &
-     &        145.9491676006352d0*z)) + z*(-2082.7344423998043d0 +      &
-                 z*(614.668925894709d0 + z*(-340.685093521782d0 +       &
+        gTp = gTp + z*(-729.116529735046d0 + z*(343.956902961561d0 +   &
+      &               z*(-124.687671116248d0 + (31.656964386073d0 -    &
+      &    7.04658803315449d0*z)*z))) + y*(z*(1721.528607567954d0 +    &
+      &            z*(-674.819060538734d0 + z*(356.629112415276d0 +    &
+      &           z*(-88.4080716616d0 + 15.84003094423364d0*z)))) +    &
+      &      y*(y*z*(1190.914967948748d0 + z*(-298.904564555024d0 +    &
+      &        145.9491676006352d0*z)) + z*(-2082.7344423998043d0 +    &
+                 z*(614.668925894709d0 + z*(-340.685093521782d0 +      &
                                       33.3848202979239d0*z)))))
-        hTp = hTp + z*(175.292041186547d0 + z*(-83.1923927801819d0 +    &
-     &     29.483064349429d0*z)) + y*(y*(1380.9597954037708d0*z -       &
-     &          938.26075044542d0*y*z) + z*(-766.116132004952d0 +       &
-     &          (108.3834525034224d0 - 51.2796974779828d0*z)*z))
+        hTp = hTp + z*(175.292041186547d0 + z*(-83.1923927801819d0 +   &
+      &     29.483064349429d0*z)) + y*(y*(1380.9597954037708d0*z -     &
+      &          938.26075044542d0*y*z) + z*(-766.116132004952d0 +     &
+      &          (108.3834525034224d0 - 51.2796974779828d0*z)*z))
       end if
        y = 2.5d-2*t; z = 1.0d-4*p
-        fTp = fTp +5.90578348518236d0 - y*(24715.571866078d0 +          &
-     &          y*(-2210.2236124548363d0 + y*(592.743745734632d0 +      &
-     &         y*(-290.12956292128547d0 + (113.90630790850321d0 -       &
-     &                              21.35571525415769d0*y)*y))))
-        gTp = gTp - y*(-1858.920033948178d0 + y*(781.281858144429d0 +   &
-     &       y*(-388.6250910633612d0 + 87.18719211065d0*y)))
-        hTp = hTp - y*(317.440355256842d0 + y*(-202.5696441786141d0 +   &
-     &                                     67.5605099586024d0*y))
+        fTp = fTp +5.90578348518236d0 - y*(24715.571866078d0 +         &
+      &          y*(-2210.2236124548363d0 + y*(592.743745734632d0 +    &
+      &         y*(-290.12956292128547d0 + (113.90630790850321d0 -     &
+      &                              21.35571525415769d0*y)*y))))
+        gTp = gTp - y*(-1858.920033948178d0 + y*(781.281858144429d0 +  &
+      &       y*(-388.6250910633612d0 + 87.18719211065d0*y)))
+        hTp = hTp - y*(317.440355256842d0 + y*(-202.5696441786141d0 +  &
+      &                                     67.5605099586024d0*y))
         kTp = 22.6683558512829d0*(z1-z)
       if(z.ne.0.d0) then
         yz = y*z
-         fTp = fTp - ( z*(270.983805184062d0 + z*(-776.153611613101d0 + &
-     &              z*(196.51255088122d0 + z*(-28.9796526294175d0 +     &
-     &         2.13290083518327d0*z)))) + y*(z*(-2910.0729080936d0 +    &
-     &             z*(1513.116771538718d0 + z*(-546.959324647056d0 +    &
-     &           (111.1208127634436d0 - 8.68841343834394d0*z)*z))) +    &
-     &          y*(z*(2017.52334943521d0 + z*(-1498.081172457456d0 +    &
-     &            z*(718.6359919632359d0 + z*(-146.4037555781616d0 +    &
-     &     4.9892131862671505d0*z)))) + y*(z*(-1591.873781627888d0 +    &
-     &             z*(1207.261522487504d0 + z*(-608.785486935364d0 +    &
-     &    105.4993508931208d0*z))) + y*(y*(67.41756835751434d0*y*z +    &
-     &             z*(-381.06836198507096d0 + (133.7383902842754d0 -    &
-     &         49.023632509086724d0*z)*z)) + z*(973.091553087975d0 +    &
-     &                z*(-602.603274510125d0 + (276.361526170076d0 -    &
+         fTp = fTp - ( z*(270.983805184062d0 + z*(-776.153611613101d0 +&
+      &              z*(196.51255088122d0 + z*(-28.9796526294175d0 +   &
+      &         2.13290083518327d0*z)))) + y*(z*(-2910.0729080936d0 +  &
+      &             z*(1513.116771538718d0 + z*(-546.959324647056d0 +  &
+      &           (111.1208127634436d0 - 8.68841343834394d0*z)*z))) +  &
+      &          y*(z*(2017.52334943521d0 + z*(-1498.081172457456d0 +  &
+      &            z*(718.6359919632359d0 + z*(-146.4037555781616d0 +  &
+      &     4.9892131862671505d0*z)))) + y*(z*(-1591.873781627888d0 +  &
+      &             z*(1207.261522487504d0 + z*(-608.785486935364d0 +  &
+      &    105.4993508931208d0*z))) + y*(y*(67.41756835751434d0*y*z +  &
+      &             z*(-381.06836198507096d0 + (133.7383902842754d0 -  &
+      &         49.023632509086724d0*z)*z)) + z*(973.091553087975d0 +  &
+      &                z*(-602.603274510125d0 + (276.361526170076d0 -  &
                                  32.40953340386105d0*z)*z)))))))
-         gTp = gTp - ( z*(-729.116529735046d0 + z*(343.956902961561d0 + &
-     &                z*(-124.687671116248d0 + (31.656964386073d0 -     &
-     &     7.04658803315449d0*z)*z))) + y*(z*(1721.528607567954d0 +     &
-     &             z*(-674.819060538734d0 + z*(356.629112415276d0 +     &
-     &            z*(-88.4080716616d0 + 15.84003094423364d0*z)))) +     &
-     &       y*(y*z*(1190.914967948748d0 + z*(-298.904564555024d0 +     &
-     &         145.9491676006352d0*z)) + z*(-2082.7344423998043d0 +     &
-     &             z*(614.668925894709d0 + z*(-340.685093521782d0 +     &
-     &                                 33.3848202979239d0*z))))))
-         hTp = hTp - ( z*(175.292041186547d0 + z*(-83.1923927801819d0 + &
-     &       29.483064349429d0*z)) + y*(y*(1380.9597954037708d0*z -     &
-     &            938.26075044542d0*y*z) + z*(-766.116132004952d0 +     &
-     &          (108.3834525034224d0 - 51.2796974779828d0*z)*z)))
+         gTp = gTp - ( z*(-729.116529735046d0 + z*(343.956902961561d0 +&
+      &                z*(-124.687671116248d0 + (31.656964386073d0 -   &
+      &     7.04658803315449d0*z)*z))) + y*(z*(1721.528607567954d0 +   &
+      &             z*(-674.819060538734d0 + z*(356.629112415276d0 +   &
+      &            z*(-88.4080716616d0 + 15.84003094423364d0*z)))) +   &
+      &       y*(y*z*(1190.914967948748d0 + z*(-298.904564555024d0 +   &
+      &         145.9491676006352d0*z)) + z*(-2082.7344423998043d0 +   &
+      &             z*(614.668925894709d0 + z*(-340.685093521782d0 +   &
+      &                                 33.3848202979239d0*z))))))
+         hTp = hTp - ( z*(175.292041186547d0 + z*(-83.1923927801819d0 +&
+      &       29.483064349429d0*z)) + y*(y*(1380.9597954037708d0*z -   &
+      &            938.26075044542d0*y*z) + z*(-766.116132004952d0 +   &
+      &          (108.3834525034224d0 - 51.2796974779828d0*z)*z)))
       end if
       entropy_diff_F = 2.5d-2*(fTp+x2*(gTp+x*hTp+x2*kTp))
 
@@ -957,35 +867,35 @@
       implicit real*8(a-h,o-z)
 
       x2 = 2.5d-2*s; x = sqrt(x2); y = 2.5d-2*t; z = 1.0d-4*p
-      de_dt = 24715.571866078d0 + x2*(-1858.920033948178d0 +            &
-     &                x*(317.440355256842d0 + y*(-405.1392883572282d0 + &
-     &          202.6815298758072d0*y)) + y*(1562.563716288858d0 +      &
-     &          y*(-1165.8752731900836d0 + 348.7487684426d0*y))) +      &
-     &         y*(-4420.4472249096725d0 + y*(1778.231237203896d0 +      &
-     &            y*(-1160.5182516851419d0 + (569.531539542516d0 -      &
-     &                              128.13429152494615d0*y)*y)))
+      de_dt = 24715.571866078d0 + x2*(-1858.920033948178d0 +           &
+      &               x*(317.440355256842d0 + y*(-405.1392883572282d0 +&
+      &          202.6815298758072d0*y)) + y*(1562.563716288858d0 +    &
+      &          y*(-1165.8752731900836d0 + 348.7487684426d0*y))) +    &
+      &         y*(-4420.4472249096725d0 + y*(1778.231237203896d0 +    &
+      &            y*(-1160.5182516851419d0 + (569.531539542516d0 -    &
+      &                              128.13429152494615d0*y)*y)))
       if(z.ne.0.d0) then
-        de_dt = de_dt +                                                 &
-     &           z*(-2910.0729080936d0 + x2*(1721.528607567954d0 +      &
-     &        y*(-4165.4688847996085d0 + 3572.7449038462437d0*y) +      &
-     &            x*(-766.116132004952d0 + (2761.9195908075417d0 -      &
-     &         2814.78225133626d0*y)*y)) + y*(4035.04669887042d0 +      &
-     &            y*(-4775.621344883664d0 + y*(3892.3662123519d0 +      &
-     &      y*(-1905.341809925355d0 + 404.50541014508605d0*y)))) +      &
-     &          z*(1513.116771538718d0 + x2*(-674.819060538734d0 +      &
-     &              108.3834525034224d0*x + (1229.337851789418d0 -      &
-     &        896.713693665072d0*y)*y) + y*(-2996.162344914912d0 +      &
-     &            y*(3621.784567462512d0 + y*(-2410.4130980405d0 +      &
-     &          668.691951421377d0*y))) + z*(-546.959324647056d0 +      &
-     &             x2*(356.629112415276d0 - 51.2796974779828d0*x +      &
-     &         y*(-681.370187043564d0 + 437.84750280190565d0*y)) +      &
-     &         y*(1437.2719839264719d0 + y*(-1826.356460806092d0 +      &
-     &        (1105.446104680304d0 - 245.11816254543362d0*y)*y)) +      &
-     &             z*(111.1208127634436d0 + x2*(-88.4080716616d0 +      &
-     &           66.7696405958478d0*y) + y*(-292.8075111563232d0 +      &
-     &         (316.49805267936244d0 - 129.6381336154442d0*y)*y) +      &
-     &             (-8.68841343834394d0 + 15.84003094423364d0*x2 +      &
-     &                              9.978426372534301d0*y)*z))))
+        de_dt = de_dt +                                                &
+      &           z*(-2910.0729080936d0 + x2*(1721.528607567954d0 +    &
+      &        y*(-4165.4688847996085d0 + 3572.7449038462437d0*y) +    &
+      &            x*(-766.116132004952d0 + (2761.9195908075417d0 -    &
+      &         2814.78225133626d0*y)*y)) + y*(4035.04669887042d0 +    &
+      &            y*(-4775.621344883664d0 + y*(3892.3662123519d0 +    &
+      &      y*(-1905.341809925355d0 + 404.50541014508605d0*y)))) +    &
+      &          z*(1513.116771538718d0 + x2*(-674.819060538734d0 +    &
+      &              108.3834525034224d0*x + (1229.337851789418d0 -    &
+      &        896.713693665072d0*y)*y) + y*(-2996.162344914912d0 +    &
+      &            y*(3621.784567462512d0 + y*(-2410.4130980405d0 +    &
+      &          668.691951421377d0*y))) + z*(-546.959324647056d0 +    &
+      &             x2*(356.629112415276d0 - 51.2796974779828d0*x +    &
+      &         y*(-681.370187043564d0 + 437.84750280190565d0*y)) +    &
+      &         y*(1437.2719839264719d0 + y*(-1826.356460806092d0 +    &
+      &        (1105.446104680304d0 - 245.11816254543362d0*y)*y)) +    &
+      &             z*(111.1208127634436d0 + x2*(-88.4080716616d0 +    &
+      &           66.7696405958478d0*y) + y*(-292.8075111563232d0 +    &
+      &         (316.49805267936244d0 - 129.6381336154442d0*y)*y) +    &
+      &             (-8.68841343834394d0 + 15.84003094423364d0*x2 +    &
+      &                              9.978426372534301d0*y)*z))))
       end if
       de_dt_F = 6.25d-4*de_dt
 
@@ -1003,17 +913,17 @@
       implicit real*8(a-h,o-z)
 
       x2 = 2.5d-2*s; x = sqrt(x2); y = 2.5d-2*th;
-      penthalpy_F = 61.013624165232955d0 + y*(168776.46138048015d0  +   &
-     &            y*(-2735.2785605119643d0 + y*(2574.2164453821442d0 +  &
-     &              y*(-1536.6644434977545d0 + y*(545.734049793163d0 +  &
-     &        (-50.910917284743334d0 - 18.30489878927802d0*y)*y))))) +  &
-     &             x2*(416.31512917743896d0 + x*(937.9793807560891d0 +  &
-     &              x*(-3140.435779506947d0 + x*(2975.170149976973d0 +  &
-     &            x*(-1760.137081144729d0 + x*414.5655751783703d0))) +  &
-     &              y*(2167.72082596016d0 + y*(-1224.5772800562902d0 +  &
-     &             y*(326.3074029273967d0 + 50.6703824689518d0*y)))) +  &
-     &               y*(-12694.10018182362d0 + y*(4405.71847182968d0 +  &
-     &            y*(-2132.9690185026416d0 + y*(303.91071982808035d0 +  &
+      penthalpy_F = 61.013624165232955d0 + y*(168776.46138048015d0  +  &
+      &            y*(-2735.2785605119643d0 + y*(2574.2164453821442d0 +&
+      &              y*(-1536.6644434977545d0 + y*(545.734049793163d0 +&
+      &        (-50.910917284743334d0 - 18.30489878927802d0*y)*y))))) +&
+      &             x2*(416.31512917743896d0 + x*(937.9793807560891d0 +&
+      &              x*(-3140.435779506947d0 + x*(2975.170149976973d0 +&
+      &            x*(-1760.137081144729d0 + x*414.5655751783703d0))) +&
+      &              y*(2167.72082596016d0 + y*(-1224.5772800562902d0 +&
+      &             y*(326.3074029273967d0 + 50.6703824689518d0*y)))) +&
+      &               y*(-12694.10018182362d0 + y*(4405.71847182968d0 +&
+      &            y*(-2132.9690185026416d0 + y*(303.91071982808035d0 +&
                                             69.74975368852d0*y)))))
 
       RETURN
@@ -1032,13 +942,13 @@
       implicit real*8(a-h,o-z)
 
       x2 = 2.5d-2*s; x = sqrt(x2); y = 2.5d-2*th
-      de_dt = 24715.571866078d0 + x2*(-1858.920033948178d0 +            &
-     &           x*(317.440355256842d0 + y*(-405.1392883572282d0 +      &
-     &          202.6815298758072d0*y)) + y*(1562.563716288858d0 +      &
-     &          y*(-1165.8752731900836d0 + 348.7487684426d0*y))) +      &
-     &         y*(-4420.4472249096725d0 + y*(1778.231237203896d0 +      &
-     &            y*(-1160.5182516851419d0 + (569.531539542516d0 -      &
-     &                              128.13429152494615d0*y)*y)))
+      de_dt = 24715.571866078d0 + x2*(-1858.920033948178d0 +           &
+      &           x*(317.440355256842d0 + y*(-405.1392883572282d0 +    &
+      &          202.6815298758072d0*y)) + y*(1562.563716288858d0 +    &
+      &          y*(-1165.8752731900836d0 + 348.7487684426d0*y))) +    &
+      &         y*(-4420.4472249096725d0 + y*(1778.231237203896d0 +    &
+      &            y*(-1160.5182516851419d0 + (569.531539542516d0 -    &
+      &                              128.13429152494615d0*y)*y)))
       de_dt0_F = 6.25d-4*de_dt
 
       RETURN
@@ -1065,21 +975,21 @@
       implicit real*8(a-h,o-z)
       character*(*) sat
       sqrts = sqrt(s)
-      tf_num =                    2.5180516744541290d-03    +           &
-     &                        s*(-5.8545863698926184d-02    +           &
-     &                    sqrts*( 2.2979985780124325d-03    -           &
-     &                   sqrts *  3.0086338218235500d-04))  +           &
-     &                        p*(-7.0023530029351803d-04    +           &
-     &                        p*( 8.4149607219833806d-09    +           &
-     &                       s *  1.1845857563107403d-11));           
-      tf_den =                          1.0000000000000000d+00    +     &
-     &                              p*(-3.8493266309172074d-05    +     &
-     &                             p *  9.1686537446749641d-10)   +     &
-     &                      s*s*sqrts*  1.3632481944285909d-06
+      tf_num =                    2.5180516744541290d-03    +          &
+      &                        s*(-5.8545863698926184d-02    +         &
+      &                    sqrts*( 2.2979985780124325d-03    -         &
+      &                   sqrts *  3.0086338218235500d-04))  +         &
+      &                        p*(-7.0023530029351803d-04    +         &
+      &                        p*( 8.4149607219833806d-09    +         &
+      &                       s *  1.1845857563107403d-11));           
+      tf_den =                          1.0000000000000000d+00    +    &
+      &                              p*(-3.8493266309172074d-05    +   &
+      &                             p *  9.1686537446749641d-10)   +   &
+      &                      s*s*sqrts*  1.3632481944285909d-06
       fp_theta = tf_num/tf_den;
       if(sat.eq.'air-sat') then
-      fp_theta = fp_theta          -2.5180516744541290d-03    +         &
-     &                             s *  1.428571428571429d-05
+      fp_theta = fp_theta          -2.5180516744541290d-03    +        &
+      &                             s *  1.428571428571429d-05
       elseif(sat.eq.'air-free') then
       continue
       else
@@ -1116,8 +1026,8 @@
       IF(abs(thetad).lt.tpmd) return
        epsi = epsi-thetad
       ENDdo
-      write(6,*) ' WARNING!',                                           &
-     & ' in-situ temperature calculation has not converged!', i,j
+      write(6,*) ' WARNING!',                                          &
+      & ' in-situ temperature calculation has not converged!', i,j
       RETURN
       END SUBROUTINE potit
 ! *********************************************************************
@@ -1186,11 +1096,11 @@
       data e0,e1,e2    /-4.6206D-13,  1.8676D-14, -2.1687D-16/
 
       ds = Sal-s0
-      dTemp = ( ( (e2*Temp + e1)*Temp + e0 )*Pres                       &
-     &      + ( (d1*Temp + d0)*ds                                       &
-     &      + ( (c3*Temp + c2)*Temp + c1 )*Temp + c0 ) )*Pres           &
-     &      + (b1*Temp + b0)*ds +  ( (a3*Temp + a2)*Temp + a1 )*Temp    &
-     &      + a0
+      dTemp = ( ( (e2*Temp + e1)*Temp + e0 )*Pres                      &
+      &      + ( (d1*Temp + d0)*ds                                     &
+      &      + ( (c3*Temp + c2)*Temp + c1 )*Temp + c0 ) )*Pres         &
+      &      + (b1*Temp + b0)*ds +  ( (a3*Temp + a2)*Temp + a1 )*Temp  &
+      &      + a0
       RETURN
       END FUNCTION dTemp
 # endif

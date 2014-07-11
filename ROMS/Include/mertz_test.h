@@ -12,6 +12,7 @@
 ** Input script:       ocean_mertz_test.in
 */
 #define UV_ADV
+#undef UV_C4ADVECTION 
 #define DJ_GRADPS
 #define UV_COR
 #define UV_VIS2
@@ -34,8 +35,9 @@
 #undef AVERAGES
 #undef ATM_PRESS
 #undef ANA_PAIR
-#define MASKING
-#define ANA_MASK
+#undef MASKING
+#undef ANA_MASK
+#define WET_DRY
 #define PERFECT_RESTART
 #define ANA_GRID
 #define ANA_INITIAL
@@ -57,7 +59,6 @@
 #undef ICESHELF_2EQN_VBC
 #define ICESHELF_3EQN_VBC
 #undef ICESHELF_TEOS10
-
 
 
 #undef  ANA_VMIX
@@ -90,4 +91,32 @@
 #undef UV_PSOURCE
 #undef ANA_PSOURCE
 #undef TS_PSOURCE
+
+/* For boundary conditions */
+#define ANA_FSOBC
+#define ANA_TOBC
+#define ANA_M3OBC
+#define ANA_M2OBC
+/*# ifdef ANA_FSOBC
+#  define FSOBC_REDUCED
+#  undef NORTH_FSCLAMPED
+#  define NORTH_FSCHAPMAN
+#  define NORTH_M2FLATHER
+#  define NORTH_M3RADIATION
+#  define NORTH_VOLCONS
+# else
+#  define NORTHERN_WALL
+# endif
+
+#define EASTERN_WALL
+#define WESTERN_WALL
+#define SOUTHERN_WALL
+*/
+
+#undef NORTH_TRADIATION
+#undef NORTH_TNUDGING
+
+#undef NORTH_FSRADIATION
+#undef NORTH_M2RADIATION
+#undef NORTH_M3RADIATION
 

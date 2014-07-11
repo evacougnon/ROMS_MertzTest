@@ -46,8 +46,8 @@ ifdef USE_NETCDF4
     NETCDF_INCDIR ?= $(shell $(NC_CONFIG) --prefix)/include
              LIBS := $(shell $(NC_CONFIG) --flibs)
 else
-    NETCDF_INCDIR ?= /apps/netcdf/3.6.3-gcc/include
-    NETCDF_LIBDIR ?= /apps/netcdf/3.6.3-gcc/lib
+    NETCDF_INCDIR ?= /opt/gfortransoft/serial/netcdf3/include
+    NETCDF_LIBDIR ?= /opt/gfortransoft/serial/netcdf3/lib
              LIBS := -L$(NETCDF_LIBDIR) -lnetcdf
 endif
 

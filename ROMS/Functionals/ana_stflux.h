@@ -13,6 +13,7 @@
 !=======================================================================
 !
       USE mod_param
+      USE mod_grid
       USE mod_forces
       USE mod_ncparam
 !
@@ -25,6 +26,7 @@
       CALL ana_stflux_tile (ng, tile, model, itrc,                      &
      &                      LBi, UBi, LBj, UBj,                         &
      &                      IminS, ImaxS, JminS, JmaxS,                 &
+     &                      GRID(ng) % zice,                            &
 #ifdef SHORTWAVE
      &                      FORCES(ng) % srflx,                         &
 #endif
@@ -50,6 +52,7 @@
       SUBROUTINE ana_stflux_tile (ng, tile, model, itrc,                &
      &                            LBi, UBi, LBj, UBj,                   &
      &                            IminS, ImaxS, JminS, JmaxS,           &
+     &                            zice,                                 &
 #ifdef SHORTWAVE
      &                            srflx,                                &
 #endif
@@ -72,6 +75,7 @@
       integer, intent(in) :: ng, tile, model, itrc
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
+      real(r8), intent(in) :: zice(LBi:UBi,LBj:UBj)
 !
 #ifdef ASSUMED_SHAPE
 # ifdef SHORTWAVE
@@ -116,6 +120,11 @@
             tl_stflx(i,j,itrc)=0.0_r8
 # endif
 #endif
+!#if defined ICETEST2D || defined MERTZ_TEST
+!	IF (zice(i,j).eq.0.0_r8) THEN
+!	    stflx(i,j,itrc)=-0.02_r8
+!        END IF
+!#endif
           END DO
         END DO
 !
@@ -131,6 +140,11 @@
 #ifdef TL_IOMS
             tl_stflx(i,j,itrc)=0.0_r8
 #endif
+!#if defined ICETEST2D || defined MERTZ_TEST
+!        IF (zice(i,j).eq.0.0_r8) THEN
+!            stflx(i,j,itrc)=2.0e-3_r8
+!        END IF
+!#endif
           END DO
         END DO
 !

@@ -45,6 +45,7 @@
 #define ANA_BSFLUX
 #define ANA_BTFLUX
 #define ANA_SRFLUX
+#define PERFECT_RESTART
 
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
@@ -81,17 +82,32 @@
 #undef TS_PSOURCE
 
 /* For boundary conditions */
-#undef ANA_FSOBC
+#define ANA_FSOBC
 #define ANA_TOBC
-#undef ANA_M3OBC
-#undef ANA_M2OBC
+#define ANA_M3OBC
+#define ANA_M2OBC
+/*# ifdef ANA_FSOBC
+#  define FSOBC_REDUCED
+#  undef NORTH_FSCLAMPED
+#  define NORTH_FSCHAPMAN
+#  define NORTH_M2FLATHER
+#  define NORTH_M3RADIATION
+#  define NORTH_VOLCONS
+# else
+#  define NORTHERN_WALL
+# endif
 
-#define NORTH_TRADIATION
-#define NORTH_TNUDGING
+#define EASTERN_WALL
+#define WESTERN_WALL
+#define SOUTHERN_WALL
+*/
 
-#define NORTH_FSRADIATION
-#define NORTH_M2RADIATION
-#define NORTH_M3RADIATION
+#undef NORTH_TRADIATION
+#undef NORTH_TNUDGING
+
+#undef NORTH_FSRADIATION
+#undef NORTH_M2RADIATION
+#undef NORTH_M3RADIATION
 
 
  

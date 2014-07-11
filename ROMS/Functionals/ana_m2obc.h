@@ -17,6 +17,7 @@
       USE mod_ncparam
       USE mod_ocean
       USE mod_stepping
+      USE mod_boundary
 !
 ! Imported variable declarations.
 !

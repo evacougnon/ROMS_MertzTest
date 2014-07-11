@@ -29,7 +29,7 @@
 #  elif defined ICESHELF_3EQN_VBC
       real(r8), parameter :: Pr = 13.8_r8
       real(r8), parameter :: Sc = 2432.2_r8
-      real(r8), parameter :: Cd = 5.0e-3_r8
+      real(r8), parameter :: Cd = 3.0e-3_r8 ! 3.0e-3_r8
       real(r8), parameter :: visc = 1.95e-6_r8
       real(r8), parameter :: L = 3.33e5_r8
       real(r8), parameter :: small = 1.0e-4_r8
@@ -41,12 +41,12 @@
 #  endif
 #  ifdef ANA_SEAICE
       real(r8), parameter :: trelax = 1.0_r8 * 86400.0_r8 ! 1 days
-      real(r8), parameter :: saltMax = 35.0_r8
-      real(r8), parameter :: saltMin = 34.0_r8
-      real(r8), parameter :: sRateInc = 0.0085_r8
-      real(r8), parameter :: sRateDec = 0.0283333_r8
-      real(r8), parameter :: Tmax = 0.0_r8
-      real(r8), parameter :: Tmin = -1.9_r8
+      real(r8), parameter :: saltMax = 34.75_r8 !34.0_r8
+      real(r8), parameter :: saltMin = 34.50_r8 !35.0_r8
+      real(r8), parameter :: sRateInc = 0.0016340_r8 !0.0085_r8
+      real(r8), parameter :: sRateDec = 0.0040323_r8 !0.0283333_r8
+      real(r8), parameter :: Tmax = -1.5_r8 !0.0_r8
+      real(r8), parameter :: Tmin = -1.91_r8 !-1.9_r8
       real(r8) :: tyear, sfcTemp, sfcSalt
 #   else
       real(r8), parameter :: trelax = 10.0_r8 * 86400.0_r8 !1 day

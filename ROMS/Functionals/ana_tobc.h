@@ -219,15 +219,27 @@
         END DO
       END IF
 
-#elif defined ICETEST2D
+#elif defined ICETEST2D || defined MERTZ_TEST
       IF (ANY(LBC(inorth,isTvar(:),ng)%acquire).and.                     &
      &    DOMAIN(ng)%Northern_Edge(tile)) THEN
         DO k=1,N(ng)
           DO i=IstrT,IendT
-            BOUNDARY(ng)%t_north(i,k,itemp)=1.0_r8
-            BOUNDARY(ng)%t_north(i,k,isalt)=34.7_r8
+            BOUNDARY(ng)%t_north(i,k,itemp)=0.0_r8
+            BOUNDARY(ng)%t_north(i,k,isalt)=0.0_r8
           END DO
         END DO
+!        DO k=7,20
+!          DO i=IstrT,IendT
+!            BOUNDARY(ng)%t_north(i,k,itemp)=0.0_r8
+!            BOUNDARY(ng)%t_north(i,k,isalt)=34.6_r8
+!          END DO
+!        END DO
+!        DO k=21,N(ng)
+!          DO i=IstrT,IendT
+!            BOUNDARY(ng)%t_north(i,k,itemp)=-1.9_r8
+!            BOUNDARY(ng)%t_north(i,k,isalt)=33.5_r8
+!          END DO
+!        END DO
       END IF
 
 #else
