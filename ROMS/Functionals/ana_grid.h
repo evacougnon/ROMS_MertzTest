@@ -406,7 +406,7 @@
       f0=0.0_r8
       beta=0.0_r8
 #elif defined MERTZ_TEST
-      Xsize=700.0E+03_r8
+      Xsize=400.0E+03_r8
       Esize=500.0E+03_r8
       depth=600.0_r8
       f0=0.0_r8
@@ -1107,7 +1107,13 @@
 # elif defined MERTZ_TEST
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          h(i,j)=600.0_r8
+          IF (j.eq.0) THEN
+             h(i,j)=600.0_r8
+          ELSE IF (j.le.21) THEN
+             h(i,j)=600.0_r8-(200.0_r8/20.0_r8)*REAL(j-1,r8)
+          ELSE
+             h(i,j)=400.0_r8
+          END IF        
         END DO
       END DO
 !      DO j=JstrR,JendR
@@ -1126,7 +1132,13 @@
 # elif defined ICETEST2D
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-         h(i,j)=600.0_r8
+          IF (j.eq.0) THEN
+             h(i,j)=600.0_r8
+          ELSE IF (j.le.21) THEN
+             h(i,j)=600.0_r8-(200.0_r8/20.0_r8)*REAL(j-1,r8)
+          ELSE
+             h(i,j)=400.0_r8
+          END IF
         END DO
       END DO
 #else

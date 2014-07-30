@@ -225,21 +225,9 @@
         DO k=1,N(ng)
           DO i=IstrT,IendT
             BOUNDARY(ng)%t_north(i,k,itemp)=0.0_r8
-            BOUNDARY(ng)%t_north(i,k,isalt)=0.0_r8
+            BOUNDARY(ng)%t_north(i,k,isalt)=34.6_r8
           END DO
         END DO
-!        DO k=7,20
-!          DO i=IstrT,IendT
-!            BOUNDARY(ng)%t_north(i,k,itemp)=0.0_r8
-!            BOUNDARY(ng)%t_north(i,k,isalt)=34.6_r8
-!          END DO
-!        END DO
-!        DO k=21,N(ng)
-!          DO i=IstrT,IendT
-!            BOUNDARY(ng)%t_north(i,k,itemp)=-1.9_r8
-!            BOUNDARY(ng)%t_north(i,k,isalt)=33.5_r8
-!          END DO
-!        END DO
       END IF
 
 #else
