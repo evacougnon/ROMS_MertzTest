@@ -1261,32 +1261,32 @@
           END IF
         END DO
       END DO
-#  elif defined MERTZ_TEST
-      DO j=JstrR,JendR
-        DO i=IstrR,IendR
-!          IF ((i.gt.29).and.(i.lt.38).and.(j.eq.0)) THEN
-!            zice(i,j)=-450.0_r8
-!          ELSE IF ((i.gt.29).and.(i.lt.38).and.(j.le.32)) THEN
-!            zice(i,j)=atan(0.3_r8*REAL(j-8,r8))*(500.0_r8/pi)          &
-!     &                + atan(7.0_r8)*(500.0_r8/pi)-500.0_r8+pi
-!!            zice(i,j)=-400.0_r8+(400.0_r8/31.0_r8)*REAL(j-1,r8)
-          IF (j.eq.0) THEN
-            zice(i,j)=-550.0_r8
-          ELSE IF (j.le.31) THEN
-            zice(i,j)=-550.0_r8+(350.0_r8/30.0_r8)*REAL(j-1,r8)
-          ELSE
-            zice(i,j)=0.0_r8
-          END IF
-!          IF ((i.gt.16).and.(i.lt.20).and.(j.eq.0)) THEN
-!            zice(i,j)=-400.0_r8
-!          ELSE IF ((i.gt.16).and.(i.lt.20).and.(j.le.16)) THEN
-!            zice(i,j)=-400.0_r8+(200.0_r8/15.0_r8)*REAL(j-1,r8)
+!#  elif defined MERTZ_TEST
+!      DO j=JstrR,JendR
+!        DO i=IstrR,IendR
+!!          IF ((i.gt.29).and.(i.lt.38).and.(j.eq.0)) THEN
+!!            zice(i,j)=-450.0_r8
+!!          ELSE IF ((i.gt.29).and.(i.lt.38).and.(j.le.32)) THEN
+!!            zice(i,j)=atan(0.3_r8*REAL(j-8,r8))*(500.0_r8/pi)          &
+!!     &                + atan(7.0_r8)*(500.0_r8/pi)-500.0_r8+pi
+!!!            zice(i,j)=-400.0_r8+(400.0_r8/31.0_r8)*REAL(j-1,r8)
+!          IF (j.eq.0) THEN
+!            zice(i,j)=-550.0_r8
+!          ELSE IF (j.le.31) THEN
+!            zice(i,j)=-550.0_r8+(350.0_r8/30.0_r8)*REAL(j-1,r8)
 !          ELSE
 !            zice(i,j)=0.0_r8
 !          END IF
-        END DO
-      END DO
-#  elif defined ICETEST2D
+!!          IF ((i.gt.16).and.(i.lt.20).and.(j.eq.0)) THEN
+!!            zice(i,j)=-400.0_r8
+!!          ELSE IF ((i.gt.16).and.(i.lt.20).and.(j.le.16)) THEN
+!!            zice(i,j)=-400.0_r8+(200.0_r8/15.0_r8)*REAL(j-1,r8)
+!!          ELSE
+!!            zice(i,j)=0.0_r8
+!!          END IF
+!        END DO
+!      END DO
+#  elif defined ICETEST2D || defined MERTZ_TEST
       DO j=JstrR,JendR
         DO i=IstrR,IendR
           IF (j.eq.0) THEN

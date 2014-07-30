@@ -745,8 +745,8 @@
       DO k=1,N(ng)
         DO j=JstrR,JendR
           DO i=IstrR,IendR
-            t(i,j,k,1,itemp)=-1.9_r8
-            t(i,j,k,1,isalt)=34.6_r8
+            t(i,j,k,1,itemp)=-1.8_r8
+            t(i,j,k,1,isalt)=34.4_r8
             t(i,j,k,2,itemp)=t(i,j,k,1,itemp)
             t(i,j,k,2,isalt)=t(i,j,k,1,isalt)
           END DO
