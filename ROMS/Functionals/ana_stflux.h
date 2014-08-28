@@ -121,8 +121,8 @@
 # endif
 #endif
 !#if defined ICETEST2D || defined MERTZ_TEST
-!	IF (zice(i,j).eq.0.0_r8) THEN
-!	    stflx(i,j,itrc)=-0.02_r8
+!        IF (zice(i,j).eq.0.0_r8) THEN
+!           stflx(i,j,itrc)=-7.34e-5_r8
 !        END IF
 !#endif
           END DO
@@ -136,7 +136,7 @@
       ELSE IF (itrc.eq.isalt) THEN
         DO j=JstrT,JendT
           DO i=IstrT,IendT
-            stflx(i,j,itrc)=0.0_r8
+!            stflx(i,j,itrc)=2.0e-3_r8
 #ifdef TL_IOMS
             tl_stflx(i,j,itrc)=0.0_r8
 #endif

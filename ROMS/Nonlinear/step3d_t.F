@@ -46,6 +46,9 @@
       USE mod_grid
       USE mod_mixing
       USE mod_ocean
+# ifdef RM_SUPERCOOLING
+      USE mod_forces
+# endif
 # ifdef TS_PSOURCE
       USE mod_sources
 # endif
@@ -110,6 +113,9 @@
 # if defined FLOATS && defined FLOAT_VWALK
      &                    MIXING(ng) % dAktdz,                          &
 # endif
+#  ifdef RM_SUPERCOOLING
+     &                    FORCES(ng) % stflx,                           &
+#  endif
 # ifdef DIAGNOSTICS_TS
      &                    DIAGS(ng) % DiaTwrk,                          &
 # endif
@@ -154,6 +160,9 @@
      &                          W,                                      &
 # if defined FLOATS && defined FLOAT_VWALK
      &                          dAktdz,                                 &
+# endif
+# ifdef RM_SUPERCOOLING
+     &                          stflx,                                  &
 # endif
 # ifdef DIAGNOSTICS_TS
      &                          DiaTwrk,                                &
@@ -239,6 +248,9 @@
       real(r8), intent(in) :: Akt(LBi:,LBj:,0:,:)
 #  endif
       real(r8), intent(in) :: W(LBi:,LBj:,0:)
+#  ifdef RM_SUPERCOOLING
+      real(r8), intent(inout) :: stflx(LBi:,LBj:,:)
+#  endif
 #  ifdef DIAGNOSTICS_TS
       real(r8), intent(inout) :: DiaTwrk(LBi:,LBj:,:,:,:)
 #  endif
@@ -294,7 +306,9 @@
       real(r8), intent(in) :: z_r(LBi:UBi,LBj:UBj,N(ng))
       real(r8), intent(in) :: Akt(LBi:UBi,LBj:UBj,0:N(ng),NAT)
       real(r8), intent(in) :: W(LBi:UBi,LBj:UBj,0:N(ng))
-
+#  ifdef RM_SUPERCOOLING
+      real(r8), intent(inout) :: stflx(LBi:UBi,LBj:UBj,NT(ng))
+#  endif
 #  ifdef DIAGNOSTICS_TS
       real(r8), intent(inout) :: DiaTwrk(LBi:UBi,LBj:UBj,N(ng),NT(ng),  &
      &                                   NDT)
@@ -317,9 +331,11 @@
       integer :: idiag
 # endif
       real(r8), parameter :: eps = 1.0E-16_r8
-
-      real(r8) :: cff, cff1, cff2, cff3
-
+      real(r8), parameter :: a = -0.057_r8
+      real(r8), parameter :: b = 0.0939_r8
+      real(r8), parameter :: c = 7.61e-4_r8
+      real(r8) :: cff, cff1, cff2, cff3, theta_f, S0_Cp_dT_Lf, delta_T
+      real(r8) :: Tm
       real(r8), dimension(IminS:ImaxS,0:N(ng)) :: CF
       real(r8), dimension(IminS:ImaxS,0:N(ng)) :: BC
       real(r8), dimension(IminS:ImaxS,0:N(ng)) :: DC
@@ -1230,6 +1246,73 @@
           END DO
         END IF
 # endif
+!-----------------------------------------------------------------------
+!     If RM_SUPERCOOLING is activated, limit temperatures to the freezing temperature.
+!     Remove super cooling by basal refreezing or pseudo frazil ice production.  
+!     Heat input is assumed to be entirely sourced from latent heat of ice production.
+!-----------------------------------------------------------------------
+
+#if defined RM_SUPERCOOLING
+       IF (itrc.eq.itemp) THEN
+         Do j=JstrR,JendR
+           Do i=IstrR,IendR
+             Do k=1,N(ng)
+              ! calculate freezing point in potential temperature
+!              theta_f = pot_freezt(t(i,j,k,nnew,isalt),-z_r(i,j,k),i,j,k)
+              theta_f=a*t(i,j,k,nnew,isalt)+b+c*-z_r(i,j,k)
+              ! check if temperature is below freezing point
+        CALL potit(t(i,j,k,nnew,isalt),t(i,j,k,nnew,itemp),-z_r(i,j,k),0.0_r8,Tm,i,j)
+              delta_T = theta_f - Tm !t(i,j,k,nnew,itemp) !itrc)
+              If (delta_T.gt.0.0_r8) THEN
+                 ! (1) compute heat to be produced by ice formation per cell
+                 ! Q = Cp * (theta_f - T) * rho0 * Hz * 1/pn * 1/pm
+                 ! [J] = [J/kg/K] * [K] * [kg/m^3] * [m] * [m] * [m]
+                 
+                 ! (2) latent heat equates to fresh water flux per grid cell
+                 ! Q / dt = - wb * 1/pn * 1/pm * rho0 * Lf 
+                 ! [J/s] = [m/s] * [m] * [m] * [kg/m^3] * [J/kg]
+                 
+                 ! combine (1) and (2)
+                 ! wb = - Cp * (theta_f - T) * Hz / (Lf * dt)
+                 ! [m/s] = [J/kg/K] * [K] * [m] / ( [J/kg] * [s] )
+                 
+                 ! (3) adjust cell salinity (linear combination)
+                 ! S1 = S0 * (1 - wb / Hz * dt)  ==  S0 * (1 + Cp * (theta_f - T) / Lf) == S0 + S0*Cp*(theta_f-T)/Lf
+                 ! [] = [] * [m/s] / [m] * [s] == [] * [J/kg/K] * [K] / [J/Kg]   
+                 
+                 ! (4) adjust surface salt flux variable (vertical integral of freezing)
+                 ! Sflux = Sflux + (S1 - S0) / dt * Hz == Sflux  +  S0*Cp*(theta_f-T)/Lf / dt * Hz   
+                 ! [m/s] = [m/s] + [] / [s] * [m] == [m/s] + [] * [J/kg/K] * [K] / [J/kg] / [s] * [m]
+                 
+                 ! (5) adjust potential temperature in cell to freezing point
+                 ! T = theta_f
+                 ! [C] = [C]
+                 
+                 ! (3)
+                 S0_Cp_dT_Lf = (t(i,j,k,nnew,isalt) *3985.0_r8* delta_T)&
+     &                       / 3.34e5_r8
+                 t(i,j,k,nnew,isalt) = t(i,j,k,nnew,isalt) + S0_Cp_dT_Lf
+                 
+                 ! (4)
+                 stflx(i,j,isalt)=stflx(i,j,isalt)+S0_Cp_dT_Lf/dt(ng)   &
+     &                           / Hz(i,j,k)
+                 
+                 ! (5)
+       t(i,j,k,nnew,itemp) = thetaa(t(i,j,k,nnew,isalt),theta_f,-z_r(i,j,k),0.0_r8)
+!                 t(i,j,k,nnew,itemp) = t(i,j,k,nnew,itemp) + delta_T
+     CALL potit(t(i,j,k,nnew,isalt),t(i,j,k,nnew,itemp),-z_r(i,j,k),0.0_r8,Tm,i,j)
+                 delta_T = theta_f - Tm !t(i,j,k,nnew,itemp) !itrc)
+                  write(6,*) delta_T
+!                 write(6,*) 'restoring freez temp at ',i,j,k, ' is ',   &
+!     &                        theta_f, ' ', delta_T ,'degC' 
+               endif
+             enddo
+           enddo
+         enddo
+       endif
+#endif
+
+
 # ifdef MASKING
 !
 !  Apply Land/Sea mask.
@@ -1307,8 +1390,111 @@
      &                    dAktdz)
 #  endif
 # endif
-
       RETURN
       END SUBROUTINE step3d_t_tile
+
+! *********************************************************************
+      SUBROUTINE potit(Sal,theta,Pres,RPres,Temp,i,j)
+! *********************************************************************
+! Calculates from the salinity (sal, psu), potential temperature 
+! (theta, degC) and reference pressure (pres, dbar) the in-situ 
+! temperaure (Temp_insitu, degC) related to the in-situ pressure 
+! (rfpres, dbar) with the help of an iterative method.
+      USE mod_kinds
+
+      integer, intent(in)   :: i, j
+      real(r8), intent(in)  :: Sal, Pres,theta
+      real(r8), intent(out) :: Temp
+
+      integer               :: ind
+      real(r8)              :: tpmd, theta1, thetad, epsi, RPres
+
+      data tpmd / 0.001 /
+
+      epsi = 0.
+      do ind=1,100
+      Temp   = theta+epsi
+      thetad  = thetaa(Sal,Temp,Pres,RPres)-theta
+      IF(abs(thetad).lt.tpmd) return
+       epsi = epsi-thetad
+      ENDdo
+      write(6,*) ' WARNING!',                                          &
+      & ' in-situ temperature calculation has not converged!', i,j
+      RETURN
+      END SUBROUTINE potit
+! *********************************************************************
+      REAL FUNCTION thetaa(Sal,Temp,Pres,RPres)
+! Calculates from the salinity (sal, psu), the in-situ temperature 
+! (Temp, degC) and the in-situ pressure press, dbar) the potential 
+! temperature (Theta, degC) converted to the reference pressure
+! (RPres, dbar). A Runge-Kutta procedure of the fourth order is used.
+!
+! Check value: theta   =    36.89073  degC
+!         given sal    =    40.0      psu
+!               Temp   =    40.0      degC
+!               pres   = 10000.000    dbar
+!               rfpres =     0.000    dbar
+      USE mod_kinds
+
+      real(r8), intent(in) ::  Sal,Temp,Pres,RPres
+      real(r8)             ::  p,t,dp,dt,q,ct2,ct3,cq2a,cq2b,cq3a,cq3b
+
+      data ct2 ,ct3  /0.29289322 ,  1.707106781/
+      data cq2a,cq2b /0.58578644 ,  0.121320344/
+      data cq3a,cq3b /3.414213562, -4.121320344/
+
+      p  = Pres
+      t  = Temp
+      dp = RPres-Pres
+      dt = dp*dTemp(Sal,t,p)
+      t  = t +0.5*dt
+      q = dt
+      p  = p +0.5*dp
+      dt = dp*dTemp(Sal,t,p)
+      t  = t + ct2*(dt-q)
+      q  = cq2a*dt + cq2b*q
+      dt = dp*dTemp(Sal,t,p)
+      t  = t + ct3*(dt-q)
+      q  = cq3a*dt + cq3b*q
+      p  = RPres
+      dt = dp*dTemp(Sal,t,p)
+
+      thetaa = t + (dt-q-q)/6.0
+
+      END FUNCTION thetaa
+
+! *********************************************************************
+! *********************************************************************
+      REAL FUNCTION dTemp(Sal,Temp,Pres)
+! Calculates from the salinity (Sal,psu), the in-situ Temperature
+! (Temp, degC) and the in-situ pressure (Pres, dbar) the adiabatic 
+! temperature gradient (dTemp, K Dbar^-1).
+!
+! Check values: dTemp  =     3.255976E-4 K dbar^-1
+!          given Sal    =    40.0         psu
+!                Temp   =    40.0         degC
+!                Pres   = 10000.000       dbar
+      USE mod_kinds
+
+      real(r8), intent(in) :: Sal, Temp, Pres
+      real(r8)             :: s0,a0,a1,a2,a3,b0,b1,c0,c1,c2,c3
+      real(r8)             :: d0,d1,e0,e1,e2,ds
+
+      data s0 /35.0D0/
+      data a0,a1,a2,a3 /3.5803D-5, 8.5258D-6, -6.8360D-8, 6.6228D-10/
+      data b0,b1       /1.8932D-6, -4.2393D-8/
+      data c0,c1,c2,c3 /1.8741D-8, -6.7795D-10, 8.7330D-12, -5.4481D-14/
+      data d0,d1       /-1.1351D-10, 2.7759D-12/
+      data e0,e1,e2    /-4.6206D-13,  1.8676D-14, -2.1687D-16/
+
+      ds = Sal-s0
+      dTemp = ( ( (e2*Temp + e1)*Temp + e0 )*Pres                      &
+      &      + ( (d1*Temp + d0)*ds                                     &
+      &      + ( (c3*Temp + c2)*Temp + c1 )*Temp + c0 ) )*Pres         &
+      &      + (b1*Temp + b0)*ds +  ( (a3*Temp + a2)*Temp + a1 )*Temp  &
+      &      + a0
+      RETURN
+      END FUNCTION dTemp
+
 #endif
       END MODULE step3d_t_mod

@@ -312,7 +312,7 @@
           END IF
         END DO
       END DO
-     write(6,*) sustr(i,j),svstr(i,j)
+!     write(6,*) sustr(i,j),svstr(i,j)
 #   elif defined UV_QDRAG
 !
 !  Set quadratic ice shelf cavity stress.
@@ -341,7 +341,7 @@
           END IF
         END DO
       END DO
-     write(6,*) sustr(i,j),svstr(i,j)
+!     write(6,*) sustr(i,j),svstr(i,j)
 #    elif defined UV_LDRAG
 !
 !  Set linear ice shelf cavity stress.
@@ -360,7 +360,7 @@
           END IF
         END DO
       END DO
-     write(6,*) sustr(i,j),svstr(i,j)
+!     write(6,*) sustr(i,j),svstr(i,j)
 #    else
       DO j=Jstr,JEND
         DO i=IstrU,IEND
@@ -424,8 +424,9 @@
 
 !    Calculate exchange coefficients. Note that this assumes log profile 
 !            ustar = 1.0e-5_r8
-            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+   &
-      &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
+            ustar = SQRT(SQRT((0.5_r8*(sustr(i,j)+sustr(i+1,j)))**2+    &
+     &                        (0.5_r8*(svstr(i,j)+svstr(i,j+1)))**2))
+!            write(6,*) ustar
 !#    ifdef MASKING
 !            ustar = ustar*rmask(i,j)
 !#    endif
@@ -529,24 +530,39 @@
 # endif
 
 #else
-      DO itrc=1,NT(ng)
+!      DO itrc=1,NT(ng)
 !        DO j=JstrR,JENDR
 !          DO i=IstrR,IENDR
 !            IF (zice(i,j).ne.0.0_r8) THEN
-              stflx(i,j,itrc)=0.0_r8
-      END DO
+!              stflx(i,j,itrc)=0.0_r8
+!      END DO
 #endif
           ELSE
-            m(i,j) = 0.0_r8
+!            m(i,j) = 0.0_r8
 # if defined ANA_SEAICE
-            stflx(i,j,itemp)=Hz(i,j,N(ng))*                            &
-                             (sfcTemp-t(i,j,N(ng),nrhs,itemp))/trelax
-            stflx(i,j,isalt)=Hz(i,j,N(ng))*                            &
-                             (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
+            stflx(i,j,itemp)=Hz(i,j,N(ng))*                             &
+     &                      (sfcTemp-t(i,j,N(ng),nrhs,itemp))/trelax
+            stflx(i,j,isalt)=Hz(i,j,N(ng))*                             &
+     &                      (sfcSalt-t(i,j,N(ng),nrhs,isalt))/trelax
 # else
-          DO itrc=1,NT(ng)
-             stflx(i,j,itrc)=0.0_r8
-          END DO
+!!!!!!!!!!!!!!!!!!!!
+!            stflux(i,j,itemp)=stflx(i,j,itemp)
+!            TFb = a*Sm+b !+c*zice(i,j)
+!       CALL potit(Sm,t(i,j,N(ng),nrhs,itemp),0.0_r8,0.0_r8,Tm,i,j)
+!           TFb = stflx(i,j,itemp)/gamma+Tm
+!           IF (t(i,j,N(ng),nrhs,itemp).lt.TFb) THEN
+!              stflx(i,j,isalt)=stflx(i,j,isalt)*t(i,j,N(ng),nrhs,isalt)
+!              stflx(i,j,itemp)=-stflx(i,j,itemp)
+!              stflx(i,j,isalt)=Cp*stflx(i,j,itemp)*refSalt/3.34e5_r8
+!           ELSE
+!              stflx(i,j,isalt)=0.0_r8
+!           END IF
+!           m(i,j) = stflx(i,j,isalt)/Sm  
+!      write(6,*) stflx(i,j,isalt),stflx(i,j,itemp)
+!          DO itrc=1,NT(ng)
+!             stflx(i,j,itrc)=0.0_r8
+!          END DO
+!!!!!!!!!!!!!!
 # endif
 
 !          END IF
@@ -566,8 +582,8 @@
 # if defined ICESHELF_MORPH
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          iceshelf_draft(i,j,nnew)=zice(i,j)-                          &
-      &                             MIN(m(i,j)*dt(ng),1.0e-3_r8) 
+          iceshelf_draft(i,j,nnew)=zice(i,j)-                           &
+     &                             MIN(m(i,j)*dt(ng),1.0e-3_r8) 
           IF(i.eq.40.and.j.eq.40) THEN
           write(6,*) m(i,j),zice(i,j),iceshelf_draft(i,j,nnew) 
           ENDIF
@@ -575,9 +591,9 @@
       END DO
 
         IF (EWperiodic(ng).or.NSperiodic(ng)) THEN
-          CALL exchange_r2d_tile (ng, tile,                            &
-      &                            LBi, UBi, LBj, UBj,                 &
-      &                            iceshelf_draft(:,:,nnew))
+          CALL exchange_r2d_tile (ng, tile,                             &
+     &                            LBi, UBi, LBj, UBj,                   &
+     &                            iceshelf_draft(:,:,nnew))
         END IF
 # endif
 

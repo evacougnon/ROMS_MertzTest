@@ -242,11 +242,14 @@
           stflx(i,j,isalt)=-Tnudg(isalt,ng)*Hz(i,j,N(ng))*              &
      &                     (t(i,j,N(ng),nrhs,isalt)-sss(i,j))
 #   else
-          stflx(i,j,isalt)=stflx(i,j,isalt)*t(i,j,N(ng),nrhs,isalt)
+!          stflx(i,j,isalt)=stflx(i,j,isalt)*t(i,j,N(ng),nrhs,isalt)
+          stflx(i,j,itemp)=-7.34e-5_r8
+!          stflx(i,j,isalt)=5.0e-5_r8
 #   endif
           btflx(i,j,isalt)=btflx(i,j,isalt)*t(i,j,1,nrhs,isalt)
         END DO
       END DO
+!      write(6,*) stflx(i,j,isalt),stflx(i,j,itemp)
 #  endif
 #  ifndef BBL_MODEL
 !

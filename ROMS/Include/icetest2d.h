@@ -46,11 +46,12 @@
 #define ANA_BTFLUX
 #define ANA_SRFLUX
 #define PERFECT_RESTART
+#define RM_SUPERCOOLING
 
 /* Define SET_VBC.F for open ocean boundary layer. Can be one of:
 * * ANA_SEAICE
 *  Note that both undef will set surface fluf of salt and temp to zero*/
-#define ANA_SEAICE
+#undef ANA_SEAICE
 /* Define SET_VBC.F for ice-ocean Thermodynamics. Can be one of:
 *  * VBC_ICE_2EQN
 *  * VBC_ICE_3EQN       

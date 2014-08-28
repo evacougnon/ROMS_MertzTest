@@ -1132,13 +1132,13 @@
 # elif defined ICETEST2D
       DO j=JstrR,JendR
         DO i=IstrR,IendR
-          IF (j.eq.0) THEN
+!          IF (j.eq.0) THEN
              h(i,j)=600.0_r8
-          ELSE IF (j.le.21) THEN
-             h(i,j)=600.0_r8-(200.0_r8/20.0_r8)*REAL(j-1,r8)
-          ELSE
-             h(i,j)=400.0_r8
-          END IF
+!          ELSE IF (j.le.21) THEN
+!             h(i,j)=600.0_r8-(200.0_r8/20.0_r8)*REAL(j-1,r8)
+!          ELSE
+!             h(i,j)=400.0_r8
+!          END IF
         END DO
       END DO
 #else
